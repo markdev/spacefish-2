@@ -54,23 +54,27 @@
                     if (i < imgArray.length) {
                         loadImage(i);
                     } else {
+                        var gameData = {
+                            "splashScreen" : {"screen" : game.img.startScreen, "events" : function() {
+                                game.canvas.addEventListener('mousedown', function() {alert("I've been pressed");}, false);
+                            }},
+                            "secondScreen" : {}
+                        }
                         loadGame(gameData);
                     }
                 };
             }());
 
-            var gameData = { "splashScreen" : "I am spacefish" }
+            var testObj = { x:0, y:0 }
 
-            var testObj = {x:0, y:0}
-
-            var GameLoop = function() {
+            var GameLoop = function(screen) {
                 var self = this;
                 this.deleteEventHandlers = function() { game.events = []; assert(game.events.length == 0, "Events is empty"); }
                 this.deleteGameObjects = function() { game.objects = []; assert(game.objects.length == 0, "Objects is empty"); }
-                this.createEventHandlers = function() { assert(true, "I am setting the event handlers");}
-                this.createGameObjects = function() { assert(true, "I am setting new game objects");}
+                this.createEventHandlers = screen.events;
+                this.createGameObjects = function() { assert(true, "I am setting new game objects"); }
                 this.clearScreen = function() {
-                    game.ctx.drawImage(game.img.startScreen, 0, 0);
+                    game.ctx.drawImage(screen.screen, 0, 0);
                 }
                 this.update = function() {
                     testObj.x++;
@@ -89,10 +93,10 @@
             }
 
             function loadGame(gameData) {
-                gameData.splashScreen = new GameLoop();
-                for (var fn in gameData.splashScreen) {
-                    if (typeof gameData.splashScreen[fn] == "function") {
-                        gameData.splashScreen[fn]();
+                var gameLoop = new GameLoop(gameData.splashScreen);
+                for (var fn in gameLoop) {
+                    if (typeof gameLoop[fn] == "function") {
+                        gameLoop[fn]();
                     }
                 }
             }
