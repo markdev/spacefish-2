@@ -16,14 +16,43 @@
     <canvas id="canvas" height="700" width="1200">Joo cannot see me!</canvas>
 
     <ul id="results">
-
     </ul>
 
     <script>
-        $(document).ready(function(){
-            assert(true, "this is working");
-            assert(false, "this is not working");
-        });
+       $(document).ready(function(){
+
+            Game = function () {};
+            game = new Game();
+            game.img = {};
+            var imgArray = [
+                "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA",
+                "crabCakesB", "darkBack", "homingFishA", "homingFishB", "orbbouncy",
+                "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock",
+                "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip",
+                "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield",
+                "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA",
+                "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB",
+                "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs",
+                "youLose", "youWin"
+            ];
+
+            (function loadImage(i) {
+                i = (typeof i !== 'undefined') ? i : 0;
+                var image = new Image();
+                image.src = 'images/' + imgArray[i] + '.png';
+                image.onload = function(e) {
+                    window['game']['img'][imgArray[i]] = image;
+                    i++;
+                    if (i < imgArray.length) {
+                        assert(true, imgArray[i] + " = " + window['game']['img'][imgArray[i]]);
+                        loadImage(i);
+                    } else {
+                        assert(true, "all done!");
+                        console.log(window['game']['img']);
+                    }
+                };
+            }());
+       });
     </script>
 
 
