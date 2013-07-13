@@ -2,10 +2,12 @@
 <head>
     <style>
         canvas#canvas { background-color: #000; }
+        #results li.pass { color: green; }
+        #results li.fail { color: red; }
     </style>
     <script src="jquery-1.9.0.min.js"></script>
-<!--    <script src="jsGoodParts.js"></script>
-    <script src="mark.js"></script>
+    <script src="myFunctions.js"></script>
+<!--<script src="mark.js"></script>
     <script src="spacefish.js"></script>        -->
 
 </head>
@@ -13,9 +15,14 @@
 
     <canvas id="canvas" height="700" width="1200">Joo cannot see me!</canvas>
 
+    <ul id="results">
+
+    </ul>
+
     <script>
         $(document).ready(function(){
-            alert("jquery");
+            assert(true, "this is working");
+            assert(false, "this is not working");
         });
     </script>
 
