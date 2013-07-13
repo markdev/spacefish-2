@@ -25,6 +25,8 @@
                 this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
                 this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
                 this.bufferCanvasCtx.canvas.height = this.ctx.canvas.height;
+                this.objects = [];
+                this.events = [];
                 this.score = 0;
                 this.lives = 3;
             };
@@ -51,21 +53,39 @@
                     i++;
                     if (i < imgArray.length) {
                         loadImage(i);
+                    } else {
+                        loadGame(gameData);
                     }
-                    // TODO: Else load game
                 };
             }());
 
             var gameData = { "splashScreen" : "I am spacefish" }
 
+            var testObj = {x:0, y:0}
+
             var GameLoop = function() {
-                this.deleteEventHandlers = function() { assert(true, "I am killing the events");}
-                this.deleteGameObjects = function() { assert(true, "I am killing the game objects");}
+                var self = this;
+                this.deleteEventHandlers = function() { game.events = []; assert(game.events.length == 0, "Events is empty"); }
+                this.deleteGameObjects = function() { game.objects = []; assert(game.objects.length == 0, "Objects is empty"); }
                 this.createEventHandlers = function() { assert(true, "I am setting the event handlers");}
                 this.createGameObjects = function() { assert(true, "I am setting new game objects");}
-                this.clearScreen = function() { assert(true, "I am clearScreen"); }
-                this.update = function() { assert(true, "I am the update function"); }
-                this.render = function() { assert(true, "I am the render function"); }
+                this.clearScreen = function() {
+                    game.ctx.drawImage(game.img.startScreen, 0, 0);
+                }
+                this.update = function() {
+                    testObj.x++;
+                    testObj.y++;
+                }
+                this.render = function() {
+                    game.ctx.fillStyle = "yellow";
+                    game.ctx.fillRect(testObj.x, testObj.y, 100, 100);
+                }
+                this.animate = function() {
+                    self.clearScreen();
+                    self.update();
+                    self.render();
+                    requestAnimationFrame(self.animate);
+                }
             }
 
             function loadGame(gameData) {
@@ -76,8 +96,6 @@
                     }
                 }
             }
-
-            loadGame(gameData);
 
     </script>
 
