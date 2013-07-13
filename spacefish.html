@@ -15,14 +15,20 @@
 
     <canvas id="canvas" height="700" width="1200">Joo cannot see me!</canvas>
 
-    <ul id="results">
-    </ul>
+    <ul id="results"></ul>
 
     <script>
-       $(document).ready(function(){
-
-            Game = function () {};
-            game = new Game();
+            var Game = function () {
+                this.canvas = document.getElementById("canvas");
+                this.ctx = canvas.getContext("2d");
+                this.bufferCanvas = document.createElement("canvas");
+                this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
+                this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
+                this.bufferCanvasCtx.canvas.height = this.ctx.canvas.height;
+                this.score = 0;
+                this.lives = 3;
+            };
+            var game = new Game();
             game.img = {};
             var imgArray = [
                 "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA",
@@ -44,15 +50,35 @@
                     window['game']['img'][imgArray[i]] = image;
                     i++;
                     if (i < imgArray.length) {
-                        assert(true, imgArray[i] + " = " + window['game']['img'][imgArray[i]]);
                         loadImage(i);
-                    } else {
-                        assert(true, "all done!");
-                        console.log(window['game']['img']);
                     }
+                    // TODO: Else load game
                 };
             }());
-       });
+
+            var gameData = { "splashScreen" : "I am spacefish" }
+
+            var GameLoop = function() {
+                this.deleteEventHandlers = function() { assert(true, "I am killing the events");}
+                this.deleteGameObjects = function() { assert(true, "I am killing the game objects");}
+                this.createEventHandlers = function() { assert(true, "I am setting the event handlers");}
+                this.createGameObjects = function() { assert(true, "I am setting new game objects");}
+                this.clearScreen = function() { assert(true, "I am clearScreen"); }
+                this.update = function() { assert(true, "I am the update function"); }
+                this.render = function() { assert(true, "I am the render function"); }
+            }
+
+            function loadGame(gameData) {
+                gameData.splashScreen = new GameLoop();
+                for (var fn in gameData.splashScreen) {
+                    if (typeof gameData.splashScreen[fn] == "function") {
+                        gameData.splashScreen[fn]();
+                    }
+                }
+            }
+
+            loadGame(gameData);
+
     </script>
 
 
