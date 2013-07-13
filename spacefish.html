@@ -72,12 +72,19 @@
                 };
             }());
 
-            var testObj = { w:100, h:100, x:0, velx:1, y:0, vely:3 }
+            var TestObj = function() {
+                this.w = 100;
+                this.h = 100;
+                this.x = 0;
+                this.velx = 1;
+                this.y = 0;
+                this.vely = 3;
+            }
 
             var GameLoop = function(screen) {
                 var self = this;
 
-                this.isRunning = true;
+                this.testObj = new TestObj();
 
                 this.deleteEventHandlers = function() { game.events = []; }
                 this.deleteGameObjects = function() { game.objects = []; }
@@ -87,28 +94,27 @@
                     game.bufferCanvasCtx.drawImage(screen.screen, 0, 0);
                 }
                 this.update = function() {
-                    if (testObj.x + testObj.w > game.ctx.canvas.width || testObj.x < 0) testObj.velx = -testObj.velx;
-                    if (testObj.y + testObj.h > game.ctx.canvas.height || testObj.y < 0) testObj.vely = -testObj.vely;
-                    testObj.x += testObj.velx;
-                    testObj.y += testObj.vely;
+                    if (self.testObj.x + self.testObj.w > game.ctx.canvas.width || self.testObj.x < 0) self.testObj.velx = -self.testObj.velx;
+                    if (self.testObj.y + self.testObj.h > game.ctx.canvas.height || self.testObj.y < 0) self.testObj.vely = -self.testObj.vely;
+                    self.testObj.x += self.testObj.velx;
+                    self.testObj.y += self.testObj.vely;
                 }
                 this.render = function() {
                     game.bufferCanvasCtx.fillStyle = "yellow";
-                    game.bufferCanvasCtx.fillRect(testObj.x, testObj.y, testObj.w, testObj.h);
+                    game.bufferCanvasCtx.fillRect(self.testObj.x, self.testObj.y, self.testObj.w, self.testObj.h);
                     game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
                 }
                 this.animate = function() {
                     self.clearScreen();
                     self.update();
                     self.render();
-                    if (self.isRunning) {
-                        requestAnimationFrame(self.animate);
-                    }
+                    requestAnimationFrame(self.animate);
                 }
             }
 
             function loadGameLoop(gameScreen) {
                 game.gameLoop = new GameLoop(gameData[gameScreen]);
+
                 for (var fn in game.gameLoop) {
                     if (typeof game.gameLoop[fn] == "function") {
                         game.gameLoop[fn]();
