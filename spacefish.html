@@ -44,6 +44,9 @@
                 "youLose", "youWin"
             ];
 
+            var splashHandler = function () {alert("I've been pressed"); loadGameLoop("secondScreen")};
+            var secondScreen = function() {alert("I am the winner"); loadGameLoop("splashScreen")};
+
             (function loadImage(i) {
                 i = (typeof i !== 'undefined') ? i : 0;
                 var image = new Image();
@@ -54,49 +57,61 @@
                     if (i < imgArray.length) {
                         loadImage(i);
                     } else {
-                        var gameData = {
+                        window.gameData = {
                             "splashScreen" : {"screen" : game.img.startScreen, "events" : function() {
-                                game.canvas.addEventListener('mousedown', function() {alert("I've been pressed");}, false);
+                                game.canvas.removeEventListener('mousedown', secondScreen);
+                                game.canvas.addEventListener('mousedown', splashHandler, false);
                             }},
-                            "secondScreen" : {}
+                            "secondScreen" : {"screen" : game.img.youWin, "events" : function() {
+                                game.canvas.removeEventListener('mousedown', splashHandler);
+                                game.canvas.addEventListener('mousedown', secondScreen, false);
+                            }}
                         }
-                        loadGame(gameData);
+                        loadGameLoop("splashScreen");
                     }
                 };
             }());
 
-            var testObj = { x:0, y:0 }
+            var testObj = { w:100, h:100, x:0, velx:1, y:0, vely:3 }
 
             var GameLoop = function(screen) {
                 var self = this;
-                this.deleteEventHandlers = function() { game.events = []; assert(game.events.length == 0, "Events is empty"); }
-                this.deleteGameObjects = function() { game.objects = []; assert(game.objects.length == 0, "Objects is empty"); }
+
+                this.isRunning = true;
+
+                this.deleteEventHandlers = function() { game.events = []; }
+                this.deleteGameObjects = function() { game.objects = []; }
                 this.createEventHandlers = screen.events;
                 this.createGameObjects = function() { assert(true, "I am setting new game objects"); }
                 this.clearScreen = function() {
-                    game.ctx.drawImage(screen.screen, 0, 0);
+                    game.bufferCanvasCtx.drawImage(screen.screen, 0, 0);
                 }
                 this.update = function() {
-                    testObj.x++;
-                    testObj.y++;
+                    if (testObj.x + testObj.w > game.ctx.canvas.width || testObj.x < 0) testObj.velx = -testObj.velx;
+                    if (testObj.y + testObj.h > game.ctx.canvas.height || testObj.y < 0) testObj.vely = -testObj.vely;
+                    testObj.x += testObj.velx;
+                    testObj.y += testObj.vely;
                 }
                 this.render = function() {
-                    game.ctx.fillStyle = "yellow";
-                    game.ctx.fillRect(testObj.x, testObj.y, 100, 100);
+                    game.bufferCanvasCtx.fillStyle = "yellow";
+                    game.bufferCanvasCtx.fillRect(testObj.x, testObj.y, testObj.w, testObj.h);
+                    game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
                 }
                 this.animate = function() {
                     self.clearScreen();
                     self.update();
                     self.render();
-                    requestAnimationFrame(self.animate);
+                    if (self.isRunning) {
+                        requestAnimationFrame(self.animate);
+                    }
                 }
             }
 
-            function loadGame(gameData) {
-                var gameLoop = new GameLoop(gameData.splashScreen);
-                for (var fn in gameLoop) {
-                    if (typeof gameLoop[fn] == "function") {
-                        gameLoop[fn]();
+            function loadGameLoop(gameScreen) {
+                game.gameLoop = new GameLoop(gameData[gameScreen]);
+                for (var fn in game.gameLoop) {
+                    if (typeof game.gameLoop[fn] == "function") {
+                        game.gameLoop[fn]();
                     }
                 }
             }
