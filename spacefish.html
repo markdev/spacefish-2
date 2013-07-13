@@ -29,48 +29,67 @@
                 this.events = [];
                 this.score = 0;
                 this.lives = 3;
+                this.img = {};
+                this.imgArray = [
+                    "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA",
+                    "crabCakesB", "darkBack", "homingFishA", "homingFishB", "orbbouncy",
+                    "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock",
+                    "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip",
+                    "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield",
+                    "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA",
+                    "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB",
+                    "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs",
+                    "youLose", "youWin"
+                ];
             };
-            var game = new Game();
-            game.img = {};
-            var imgArray = [
-                "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA",
-                "crabCakesB", "darkBack", "homingFishA", "homingFishB", "orbbouncy",
-                "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock",
-                "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip",
-                "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield",
-                "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA",
-                "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB",
-                "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs",
-                "youLose", "youWin"
-            ];
 
-            var splashHandler = function () {alert("I've been pressed"); loadGameLoop("secondScreen")};
-            var secondScreen = function() {alert("I am the winner"); loadGameLoop("splashScreen")};
-
-            (function loadImage(i) {
-                i = (typeof i !== 'undefined') ? i : 0;
-                var image = new Image();
-                image.src = 'images/' + imgArray[i] + '.png';
-                image.onload = function(e) {
-                    window['game']['img'][imgArray[i]] = image;
-                    i++;
-                    if (i < imgArray.length) {
-                        loadImage(i);
-                    } else {
-                        window.gameData = {
-                            "splashScreen" : {"screen" : game.img.startScreen, "events" : function() {
-                                game.canvas.removeEventListener('mousedown', secondScreen);
-                                game.canvas.addEventListener('mousedown', splashHandler, false);
-                            }},
-                            "secondScreen" : {"screen" : game.img.youWin, "events" : function() {
-                                game.canvas.removeEventListener('mousedown', splashHandler);
-                                game.canvas.addEventListener('mousedown', secondScreen, false);
-                            }}
+            Game.prototype = {
+                loadImage : function loadImage(i) {     // naming this function makes it accessible only for self-reference; it is not globally accessible
+                    i = (typeof i !== 'undefined') ? i : 0;
+                    var image = new Image();
+                    image.src = 'images/' + game.imgArray[i] + '.png';
+                    image.onload = function(e) {
+                        window['game']['img'][game.imgArray[i]] = image;
+                        i++;
+                        if (i < game.imgArray.length) {
+                            loadImage(i);
+                        } else {
+                            window.gameData = {
+                                "splashScreen" : {"screen" : game.img.startScreen, "events" : function() {
+                                    markRemoveListeners(secondScreen);
+                                    markAddListeners(splashHandler);
+                                }},
+                                "secondScreen" : {"screen" : game.img.youWin, "events" : function() {
+                                    markRemoveListeners(splashHandler);
+                                    markAddListeners(secondScreen);
+                                }}
+                            }
+                            game.loadGameLoop("splashScreen");
                         }
-                        loadGameLoop("splashScreen");
+                    };
+                },
+
+                loadGameLoop : function(gameScreen) {
+                    this.gameLoop = new GameLoop(gameData[gameScreen]);
+
+                    for (var fn in this.gameLoop) {
+                        if (typeof this.gameLoop[fn] == "function") {
+                            this.gameLoop[fn]();
+                        }
                     }
-                };
-            }());
+                }
+            }
+            var game = new Game();
+            game.loadImage();
+
+            var splashHandler = { "event" : "mousedown", "action" : function () {game.loadGameLoop("secondScreen")}};
+            var secondScreen = { "event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}};
+            function markRemoveListeners(listener) {
+                game.canvas.removeEventListener(listener.event, listener.action);
+            }
+            function markAddListeners(listener) {
+                game.canvas.addEventListener(listener.event, listener.action);
+            }
 
             var TestObj = function() {
                 this.w = 100;
@@ -89,7 +108,7 @@
                 this.deleteEventHandlers = function() { game.events = []; }
                 this.deleteGameObjects = function() { game.objects = []; }
                 this.createEventHandlers = screen.events;
-                this.createGameObjects = function() { assert(true, "I am setting new game objects"); }
+                this.createGameObjects = function() { }
                 this.clearScreen = function() {
                     game.bufferCanvasCtx.drawImage(screen.screen, 0, 0);
                 }
@@ -111,17 +130,6 @@
                     requestAnimationFrame(self.animate);
                 }
             }
-
-            function loadGameLoop(gameScreen) {
-                game.gameLoop = new GameLoop(gameData[gameScreen]);
-
-                for (var fn in game.gameLoop) {
-                    if (typeof game.gameLoop[fn] == "function") {
-                        game.gameLoop[fn]();
-                    }
-                }
-            }
-
     </script>
 
 
