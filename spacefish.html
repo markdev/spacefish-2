@@ -58,14 +58,26 @@
                         // <!-- Move this into a script later
                         window.spaceFishData = {
                             splashScreen : {
-                                "screen" : "startScreen",
+                                "background" : "startScreen",
+                                "update" : function () {    //TODO: figure out how to make this a completely functional object
+                                    var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
+                                    var d = new Date();
+                                    var n = String(d.getTime());
+                                    if (n.substring(10) > 500) {
+                                        game.bufferCanvasCtx.font = flashText.font;
+                                        game.bufferCanvasCtx.fillStyle = flashText.color;
+                                        game.bufferCanvasCtx.fillText(flashText.content, flashText.x, flashText.y);
+                                    }
+                                },
+                                "render" : function () { },
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {assert(true, "second event")}},
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen")}}
                                             ]
                             },
                             secondScreen : {
-                                "screen" : "youWin",
+                                "background" : "youWin",
+                                "update" : function() {},
+                                "render" : function() {},
                                 "events" : [
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}}
                                             ]
@@ -79,7 +91,6 @@
 
             loadGameLoop : function(gameScreen) {
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
-
                 // remove all the event handlers and empty this.events
                 if (this.events.length > 0) {
                     for (var i=0, len=this.events.length-1; i<=len; i++) {
@@ -87,7 +98,6 @@
                         this.events.shift();
                     }
                 }
-
                 // load this.events and add handlers
                 if (this.events.length == 0) {
                     for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
@@ -95,7 +105,6 @@
                         game.addListeners(this.events[i]);
                     }
                 }
-
                 // run the animation loop
                 for (var fn in this.gameLoop) {
                     if (typeof this.gameLoop[fn] == "function") {
@@ -115,44 +124,29 @@
         var game = new Game();
         game.loadImage();
 
-        var TestObj = function() {
-            this.w = 100;
-            this.h = 100;
-            this.x = 0;
-            this.velx = 1;
-            this.y = 0;
-            this.vely = 3;
-        }
-
-        var GameLoop = function(screen) {
+        var GameLoop = function(level) {
             var self = this;
 
-            this.testObj = new TestObj();
-
-            this.deleteEventHandlers = function() { }
-            this.deleteGameObjects = function() { }
+            this.deleteEventHandlers = function() { };
+            this.deleteGameObjects = function() { };
             //this.createEventHandlers = screen.events;
-            this.createGameObjects = function() { }
+            this.createGameObjects = function() { };
+
             this.clearScreen = function() {
-                game.bufferCanvasCtx.drawImage(window['game']['img'][screen.screen], 0, 0);
-            }
-            this.update = function() {
-                if (self.testObj.x + self.testObj.w > game.ctx.canvas.width || self.testObj.x < 0) self.testObj.velx = -self.testObj.velx;
-                if (self.testObj.y + self.testObj.h > game.ctx.canvas.height || self.testObj.y < 0) self.testObj.vely = -self.testObj.vely;
-                self.testObj.x += self.testObj.velx;
-                self.testObj.y += self.testObj.vely;
-            }
-            this.render = function() {
-                game.bufferCanvasCtx.fillStyle = "yellow";
-                game.bufferCanvasCtx.fillRect(self.testObj.x, self.testObj.y, self.testObj.w, self.testObj.h);
+                game.bufferCanvasCtx.drawImage(window['game']['img'][level.background], 0, 0);
+            };
+            this.update = level.update;
+            this.render = level.render;
+            this.drawbuffer = function() {
                 game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
-            }
+            };
             this.animate = function() {
                 self.clearScreen();
                 self.update();
                 self.render();
+                self.drawbuffer();
                 requestAnimationFrame(self.animate);
-            }
+            };
         }
     </script>
 
