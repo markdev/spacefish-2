@@ -61,27 +61,14 @@
                                 "type" : "basicSplashScreen",   // Integrate this
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
-                                /*
-                                "update" : function () {    //TODO: figure out how to make this a completely functional object
-                                    var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
-                                    var d = new Date();
-                                    var n = String(d.getTime());
-                                    if (n.substring(10) > 500) {
-                                        game.bufferCanvasCtx.font = flashText.font;
-                                        game.bufferCanvasCtx.fillStyle = flashText.color;
-                                        game.bufferCanvasCtx.fillText(flashText.content, flashText.x, flashText.y);
-                                    }
-                                },
-                                */
-                                "render" : function () { },
                                 "events" : [
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen")}}
                                             ]
                             },
                             secondScreen : {
+                                "type" : "basicSplashScreen",
                                 "background" : "youWin",
-                                "update" : function() {},
-                                "render" : function() {},
+                                "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                                 "events" : [
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}}
                                             ]
@@ -121,13 +108,10 @@
                 }
 
                 // assign members to this.gameLoop from levelData
-                for (var key in spaceFishData.splashScreen) {
-                    this.gameLoop[key] = spaceFishData.splashScreen[key];
+                for (var key in spaceFishData[gameScreen]) {
+                    this.gameLoop[key] = spaceFishData[gameScreen][key];
                 }
                 extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
-                for (var key in this.gameLoop) {
-                    console.log(key);
-                }
 
                 // run the animation loop
                 this.gameLoop.animate();
@@ -136,12 +120,9 @@
 
         var GameLoop = function(level) {
             var self = this;
-
-            this.clearScreen = function() {
-                game.bufferCanvasCtx.drawImage(window['game']['img'][level.background], 0, 0);
-            };
-         // this.update = level.update;
-            this.render = level.render;
+            this.clearScreen = function() {};
+            this.update = function() {};
+            this.render = function() {};
             this.drawbuffer = function() {
                 game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
             };
@@ -155,8 +136,10 @@
         }
 
         var basicSplashScreen = {
-            "update" : function () {    //TODO: figure out how to make this a completely functional object
-             //   var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
+            "clearScreen" : function () {
+                game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
+            },
+            "update" : function () {
                 var d = new Date();
                 var n = String(d.getTime());
                 if (n.substring(10) > 500) {
