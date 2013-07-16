@@ -69,11 +69,16 @@
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
                                             ]
                             },
-                            levelOne : {
+                            levelOne : {        //TODO: move events into sideScrollLevel function
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea",
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}},
+                                    {"event" : "mousemove", "action" : function(e) {
+                                        if (typeof game.playerArray[0] !== "undefined") {
+                                            game.playerArray[0].y = e.pageY;
+                                        }
+                                    }}
                                 ]
                             },
                             secondScreen : {
