@@ -26,7 +26,11 @@
             this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
             this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
             this.bufferCanvasCtx.canvas.height = this.ctx.canvas.height;
-            this.objects = [];
+       //     this.objects = [];
+
+            this.playerArray = [];
+
+
             this.events = [];
             this.score = 0;
             this.lives = 3;
@@ -168,12 +172,20 @@
                 this.initializeObjectArray();
             },
             "initializeObjectArray" : function() {
-              //  game.playerArray[game.playerArray.length] = new Hero();
+                game.playerArray[game.playerArray.length] = new Hero();
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             }
+        }
+
+        var Hero = function () {
+            this.x = 0;
+            this.y = canvas.height/2;
+            this.w = 120;
+            this.h = 80;
+            this.color = "white";
         }
 
         var game = new Game();
