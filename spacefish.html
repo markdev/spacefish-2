@@ -48,7 +48,7 @@
             ];
         };
 
-        Game.prototype = {
+       Game.prototype = {
             loadImage : function loadImage(i) {     // naming this function makes it accessible only for self-reference; it is not globally accessible
                 i = (typeof i !== 'undefined') ? i : 0;
                 var image = new Image();
@@ -134,7 +134,7 @@
             }
         }
 
-        var GameLoop = function(level) {
+       var GameLoop = function(level) {
             var self = this;
             this.initialize = function() {};
             this.clearScreen = function() {};
@@ -150,9 +150,9 @@
                 self.drawbuffer();
                 requestAnimationFrame(self.animate);
             };
-        }
+       }
 
-        var basicSplashScreen = {
+       var basicSplashScreen = {
             "clearScreen" : function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
             },
@@ -165,9 +165,9 @@
                     game.bufferCanvasCtx.fillText(this.flashText.content, this.flashText.x, this.flashText.y);
                 }
             }
-        }
+       }
 
-        var sideScrollLevel = {
+       var sideScrollLevel = {
             "initialize" : function() {
                 this.initializeObjectArray();
             },
@@ -177,16 +177,25 @@
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
-            }
-        }
+            },
+            "update" : function() {
 
-        var Hero = function () {
+            },
+            "render" : function() {
+                for (var i=0; i<game.playerArray.length; i++) {
+                    game.bufferCanvasCtx.fillStyle = game.playerArray[i].color;
+                    game.bufferCanvasCtx.fillRect(game.playerArray[i].x, game.playerArray[i].y, game.playerArray[i].w, game.playerArray[i].h);
+                }
+            }
+       }
+
+       var Hero = function () {
             this.x = 0;
             this.y = canvas.height/2;
             this.w = 120;
             this.h = 80;
             this.color = "white";
-        }
+       }
 
         var game = new Game();
         game.loadImage();
