@@ -60,6 +60,8 @@
                             splashScreen : {
                                 "type" : "basicSplashScreen",   // Integrate this
                                 "background" : "startScreen",
+                                "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
+                                /*
                                 "update" : function () {    //TODO: figure out how to make this a completely functional object
                                     var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
                                     var d = new Date();
@@ -70,6 +72,7 @@
                                         game.bufferCanvasCtx.fillText(flashText.content, flashText.x, flashText.y);
                                     }
                                 },
+                                */
                                 "render" : function () { },
                                 "events" : [
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen")}}
@@ -137,7 +140,7 @@
             this.clearScreen = function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][level.background], 0, 0);
             };
-            this.update = level.update;
+         // this.update = level.update;
             this.render = level.render;
             this.drawbuffer = function() {
                 game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
@@ -152,7 +155,16 @@
         }
 
         var basicSplashScreen = {
-            "hanky" : "hello" 
+            "update" : function () {    //TODO: figure out how to make this a completely functional object
+             //   var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
+                var d = new Date();
+                var n = String(d.getTime());
+                if (n.substring(10) > 500) {
+                    game.bufferCanvasCtx.font = this.flashText.font;
+                    game.bufferCanvasCtx.fillStyle = this.flashText.color;
+                    game.bufferCanvasCtx.fillText(this.flashText.content, this.flashText.x, this.flashText.y);
+                }
+            }
         }
 
         var game = new Game();
