@@ -90,6 +90,7 @@ function extend(destination, source) {
 // This approach seems to be working better
 // TODO: functions and objects inheriting from this keep displaying the "extends" method
 // TODO: make this inherit from something other than object literals
+/*
 Object.method("extends", function (source) {
     var that = this;
     for (var k in source) {
@@ -99,6 +100,7 @@ Object.method("extends", function (source) {
     }
     return that;
 });
+*/
 
 
 

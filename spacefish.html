@@ -58,6 +58,7 @@
                         // <!-- Move this into a script later
                         window.spaceFishData = {
                             splashScreen : {
+                                "type" : "basicSplashScreen",   // Integrate this
                                 "background" : "startScreen",
                                 "update" : function () {    //TODO: figure out how to make this a completely functional object
                                     var flashText = { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"};
@@ -84,13 +85,23 @@
                             }
                         }
                         // --> move this into a script later
-                        game.loadGameLoop("splashScreen");
+                        game.loadGameLoop();
                     }
                 };
             },
 
+            removeListeners : function(listener) {
+                game.canvas.removeEventListener(listener.event, listener.action);
+            },
+
+            addListeners : function(listener) {
+                game.canvas.addEventListener(listener.event, listener.action);
+            },
+
             loadGameLoop : function(gameScreen) {
+                gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
+
                 // remove all the event handlers and empty this.events
                 if (this.events.length > 0) {
                     for (var i=0, len=this.events.length-1; i<=len; i++) {
@@ -105,32 +116,23 @@
                         game.addListeners(this.events[i]);
                     }
                 }
-                // run the animation loop
-                for (var fn in this.gameLoop) {
-                    if (typeof this.gameLoop[fn] == "function") {
-                        this.gameLoop[fn]();
-                    }
+
+                // assign members to this.gameLoop from levelData
+                for (var key in spaceFishData.splashScreen) {
+                    this.gameLoop[key] = spaceFishData.splashScreen[key];
                 }
-            },
+                extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
+                for (var key in this.gameLoop) {
+                    console.log(key);
+                }
 
-            removeListeners : function(listener) {
-                game.canvas.removeEventListener(listener.event, listener.action);
-            },
-
-            addListeners : function(listener) {
-                game.canvas.addEventListener(listener.event, listener.action);
+                // run the animation loop
+                this.gameLoop.animate();
             }
         }
-        var game = new Game();
-        game.loadImage();
 
         var GameLoop = function(level) {
             var self = this;
-
-            this.deleteEventHandlers = function() { };
-            this.deleteGameObjects = function() { };
-            //this.createEventHandlers = screen.events;
-            this.createGameObjects = function() { };
 
             this.clearScreen = function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][level.background], 0, 0);
@@ -148,6 +150,13 @@
                 requestAnimationFrame(self.animate);
             };
         }
+
+        var basicSplashScreen = {
+            "hanky" : "hello" 
+        }
+
+        var game = new Game();
+        game.loadImage();
     </script>
 
 
