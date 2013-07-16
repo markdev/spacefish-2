@@ -62,8 +62,15 @@
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen")}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
                                             ]
+                            },
+                            levelOne : {
+                                "type" : "sideScrollLevel",
+                                "background" : "theSea",
+                                "events" : [
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}}
+                                ]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -101,9 +108,11 @@
                 }
                 // load this.events and add handlers
                 if (this.events.length == 0) {
-                    for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
-                        this.events[i] = spaceFishData[gameScreen]['events'][i];
-                        game.addListeners(this.events[i]);
+                    if (spaceFishData[gameScreen]['events'] !== "undefined") {
+                        for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
+                            this.events[i] = spaceFishData[gameScreen]['events'][i];
+                            game.addListeners(this.events[i]);
+                        }
                     }
                 }
 
@@ -113,6 +122,9 @@
                 }
                 extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
 
+                // start this shit
+                this.gameLoop.initialize();
+
                 // run the animation loop
                 this.gameLoop.animate();
             }
@@ -120,6 +132,7 @@
 
         var GameLoop = function(level) {
             var self = this;
+            this.initialize = function() {};
             this.clearScreen = function() {};
             this.update = function() {};
             this.render = function() {};
@@ -136,10 +149,10 @@
         }
 
         var basicSplashScreen = {
-            "clearScreen" : function () {
+            "clearScreen" : function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
             },
-            "update" : function () {
+            "update" : function() {
                 var d = new Date();
                 var n = String(d.getTime());
                 if (n.substring(10) > 500) {
@@ -147,6 +160,19 @@
                     game.bufferCanvasCtx.fillStyle = this.flashText.color;
                     game.bufferCanvasCtx.fillText(this.flashText.content, this.flashText.x, this.flashText.y);
                 }
+            }
+        }
+
+        var sideScrollLevel = {
+            "initialize" : function() {
+                this.initializeObjectArray();
+            },
+            "initializeObjectArray" : function() {
+              //  game.playerArray[game.playerArray.length] = new Hero();
+            },
+            "clearScreen" : function() {
+                game.bufferCanvasCtx.fillStyle = "black";
+                game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             }
         }
 
