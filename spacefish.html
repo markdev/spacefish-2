@@ -29,6 +29,7 @@
 
             this.playerArray = [];
             this.projectileArray = [];
+            this.opponentArray = [];
 
             this.events = [];
             this.score = 0;
@@ -70,7 +71,8 @@
                             },
                             levelOne : {
                                 "type" : "sideScrollLevel",
-                                "background" : "theSea"
+                                "background" : "theSea",
+                                "enemies" : ["Bill", "Sam"]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -157,6 +159,9 @@
        }
 
        var basicSplashScreen = {
+            "initialize" : function () {
+                if  (typeof generateEnemy !== 'undefined') clearInterval(generateEnemy);
+            },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
             },
@@ -173,12 +178,18 @@
 
        var sideScrollLevel = {
             "initialize" : function() {
+                if  (typeof generateEnemy !== 'undefined') clearInterval(generateEnemy);
                 this.clearObjectArray();
                 this.initializeObjectArray();
+                generateEnemy = setInterval(this.generateEnemy, 1000);
+            },
+            "generateEnemy" : function () {
+                assert(true, "enemy generated");
             },
             "clearObjectArray" : function () {  //TODO: clear the animation loop, it seems like it is still rendering when the screen changes
                 game.playerArray = [];
                 game.projectileArray = [];
+                game.opponentArray = [];
             },
             "initializeObjectArray" : function() {
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
@@ -229,6 +240,7 @@
                    case "dualLaser":    // TODO: fix the array shifting
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
+        game.loadGameLoop("secondScreen");
                        break;
                    default:
                        break;
