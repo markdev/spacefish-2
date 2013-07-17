@@ -57,7 +57,7 @@
                     window['game']['img'][game.imgArray[i]] = image;
                     i++;
                     if (i < game.imgArray.length) {
-                        loadImage(i);
+                        loadImage(i);   // see, that was painless
                     } else {
                         // <!-- Move this into a script later
                         window.spaceFishData = {
@@ -69,17 +69,9 @@
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
                                             ]
                             },
-                            levelOne : {        //TODO: move events into sideScrollLevel function
+                            levelOne : {  
                                 "type" : "sideScrollLevel",
-                                "background" : "theSea",
-                                "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}},
-                                    {"event" : "mousemove", "action" : function(e) {
-                                        if (typeof game.playerArray[0] !== "undefined") {
-                                            game.playerArray[0].y = e.pageY;
-                                        }
-                                    }}
-                                ]
+                                "background" : "theSea"
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -115,12 +107,18 @@
                         this.events.shift();
                     }
                 }
-                // load this.events and add handlers
+                // load this.events and add handlers            //TODO: add a condition that loads from gameLoop function
                 if (this.events.length == 0) {
-                    if (spaceFishData[gameScreen]['events'] !== "undefined") {
+                    if (spaceFishData[gameScreen].hasOwnProperty('events')) {
                         for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
                             this.events[i] = spaceFishData[gameScreen]['events'][i];
                             game.addListeners(this.events[i]);
+                        }
+                    }
+                    if (window[spaceFishData[gameScreen].type].hasOwnProperty('events')) {
+                        for (var i=0; i<=window[spaceFishData[gameScreen].type].events.length-1; i++) {
+                            this.events[this.events.length] = window[spaceFishData[gameScreen].type]['events'][i];
+                            game.addListeners(this.events[this.events.length-1]);
                         }
                     }
                 }
@@ -174,10 +172,14 @@
 
        var sideScrollLevel = {
             "initialize" : function() {
+                this.clearObjectArray();
                 this.initializeObjectArray();
             },
+            "clearObjectArray" : function () {  //TODO: clear the animation loop, it seems like it is still rendering when the screen changes
+                game.playerArray = [];
+            },
             "initializeObjectArray" : function() {
-                game.playerArray[game.playerArray.length] = new Hero();
+                game.playerArray[game.playerArray.length] = new SpaceShip();
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -188,18 +190,25 @@
             },
             "render" : function() {
                 for (var i=0; i<game.playerArray.length; i++) {
-                    game.bufferCanvasCtx.fillStyle = game.playerArray[i].color;
-                    game.bufferCanvasCtx.fillRect(game.playerArray[i].x, game.playerArray[i].y, game.playerArray[i].w, game.playerArray[i].h);
+                    game.bufferCanvasCtx.drawImage(game['img'][game.playerArray[i].image], game.playerArray[i].x, game.playerArray[i].y, game.playerArray[i].w, game.playerArray[i].h);
                 }
-            }
+            },
+            "events" : [
+                {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}},
+                {"event" : "mousemove", "action" : function(e) {
+                    if (typeof game.playerArray[0] !== "undefined") {
+                       game.playerArray[0].y = e.pageY;
+                    }
+                }}
+            ]
        }
 
-       var Hero = function () {
+       var SpaceShip = function () {
             this.x = 0;
             this.y = canvas.height/2;
             this.w = 120;
-            this.h = 80;
-            this.color = "white";
+            this.h = 60;
+            this.image = "spaceShipA";
        }
 
         var game = new Game();
