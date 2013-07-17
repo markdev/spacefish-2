@@ -193,6 +193,10 @@
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
+                        // if it exceeds boundaries
+                        if (game.projectileArray[i].x > canvas.width) {
+                            game.projectileArray.splice(i,1);
+                        }
                     }
                 }
             },
@@ -202,8 +206,10 @@
                 }
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
-                        game.bufferCanvasCtx.fillStyle = "white";
-                        game.bufferCanvasCtx.fillRect(game.projectileArray[i].x, game.projectileArray[i].y, game.projectileArray[i].w, game.projectileArray[i].h);
+                        game.bufferCanvasCtx.fillStyle = game.projectileArray[i].color;
+                        game.bufferCanvasCtx.beginPath();
+                        game.bufferCanvasCtx.arc(game.projectileArray[i].x, game.projectileArray[i].y, game.projectileArray[i].radius, 0, 2 * Math.PI);
+                        game.bufferCanvasCtx.fill();
                     }
                 }
             },
@@ -220,7 +226,7 @@
            "fire" : function(weapon) {
                switch(weapon) {
                    case "peaShooter":
-                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, 10, "white", function () {this.x += this.velx});
+                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
                        break;
                    default:
                        break;
@@ -237,13 +243,12 @@
            this.weapon = "peaShooter";
        }
 
-        var Blast = function (x, velx, y, vely, w, h, color, update) {
+        var Blast = function (x, velx, y, vely, radius, color, update) {
            this.x = x;
            this.velx = velx;
            this.y = y;
            this.vely = vely;
-           this.w = w;
-           this.h = h;
+           this.radius = radius;
            this.color = color;
            this.update = update;
         }
@@ -251,7 +256,6 @@
         var game = new Game();
         game.loadImage();
     </script>
-
 
 </body>
 </html>
