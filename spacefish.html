@@ -193,7 +193,7 @@
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
-                        // if it exceeds boundaries
+                        // if it exceeds canvas width, remove the blast from array
                         if (game.projectileArray[i].x > canvas.width) {
                             game.projectileArray.splice(i,1);
                         }
@@ -228,6 +228,10 @@
                    case "peaShooter":
                        game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
                        break;
+                   case "dualLaser":    // TODO: fix the array shifting
+                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
+                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
+                       break;
                    default:
                        break;
                }
@@ -240,7 +244,7 @@
            this.w = 120;
            this.h = 60;
            this.image = "spaceShipA";
-           this.weapon = "peaShooter";
+           this.weapon = "dualLaser";
        }
 
         var Blast = function (x, velx, y, vely, radius, color, update) {
