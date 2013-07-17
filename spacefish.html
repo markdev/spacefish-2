@@ -31,6 +31,8 @@
             this.projectileArray = [];
             this.opponentArray = [];
 
+            this.intervals = [];
+
             this.events = [];
             this.score = 0;
             this.lives = 3;
@@ -132,6 +134,9 @@
                 }
                 extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
 
+                // clear all the existing intervals
+                this.gameLoop.clearIntervals();
+
                 // start this shit
                 this.gameLoop.initialize();
 
@@ -142,6 +147,13 @@
 
        var GameLoop = function(level) {
             var self = this;
+            this.clearIntervals = function () {  // TODO: See if this can be removed altogether
+                if (typeof game.intervals[0] !== 'undefined') {
+                    for (var i=0; i<=game.intervals.length-1; i++) {
+                        clearInterval(game.intervals[i]);
+                    }
+                }
+            };
             this.initialize = function() {};
             this.clearScreen = function() {};
             this.update = function() {};
@@ -159,9 +171,6 @@
        }
 
        var basicSplashScreen = {
-            "initialize" : function () {
-                if  (typeof generateEnemy !== 'undefined') clearInterval(generateEnemy);
-            },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
             },
@@ -178,15 +187,14 @@
 
        var sideScrollLevel = {
             "initialize" : function() {
-                if  (typeof generateEnemy !== 'undefined') clearInterval(generateEnemy);
                 this.clearObjectArray();
                 this.initializeObjectArray();
-                generateEnemy = setInterval(this.generateEnemy, 1000);
+                game.intervals[game.intervals.length] = setInterval(this.generateEnemy, 1000);
             },
             "generateEnemy" : function () {
-                assert(true, "enemy generated");
+                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Enemy(100, 100, "bigBloaterA", function() {this.x -= 5;});
             },
-            "clearObjectArray" : function () {  //TODO: clear the animation loop, it seems like it is still rendering when the screen changes
+            "clearObjectArray" : function () {
                 game.playerArray = [];
                 game.projectileArray = [];
                 game.opponentArray = [];
@@ -199,6 +207,7 @@
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             },
             "update" : function() {
+                // Projectiles
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
@@ -206,6 +215,12 @@
                     // Remove blasts from projectileArray when they fly off the screen
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         if (game.projectileArray[i].x > canvas.width)  game.projectileArray.splice(i,1);
+                    }
+                }
+                // Opponents
+                if (typeof game.opponentArray[0] !== "undefined") {
+                    for (var i=0; i<=game.opponentArray.length-1; i++) {
+                        game.opponentArray[i].update();
                     }
                 }
             },
@@ -219,6 +234,11 @@
                         game.bufferCanvasCtx.beginPath();
                         game.bufferCanvasCtx.arc(game.projectileArray[i].x, game.projectileArray[i].y, game.projectileArray[i].radius, 0, 2 * Math.PI);
                         game.bufferCanvasCtx.fill();
+                    }
+                }
+                if (typeof game.opponentArray[0] !== "undefined") {
+                    for (var i=0; i<=game.opponentArray.length-1; i++) {
+                        game.bufferCanvasCtx.drawImage(game['img'][game.opponentArray[i].img], game.opponentArray[i].x, game.opponentArray[i].y, game.opponentArray[i].w, game.opponentArray[i].h);
                     }
                 }
             },
@@ -237,7 +257,7 @@
                    case "peaShooter":
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
                        break;
-                   case "dualLaser":    // TODO: fix the array shifting
+                   case "dualLaser":
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
         game.loadGameLoop("secondScreen");
@@ -264,6 +284,15 @@
                this.vely = vely;
                this.radius = radius;
                this.color = color;
+               this.update = update;
+           },
+
+           "Enemy" : function (w, h, img, update) {
+               this.w = w;
+               this.h = h;
+               this.x = canvas.width;
+               this.y = Math.random() * canvas.height - this.h;
+               this.img = img;
                this.update = update;
            }
        }
