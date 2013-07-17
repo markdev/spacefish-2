@@ -29,6 +29,7 @@
        //     this.objects = [];
 
             this.playerArray = [];
+            this.projectileArray = [];
 
 
             this.events = [];
@@ -179,6 +180,7 @@
             },
             "clearObjectArray" : function () {  //TODO: clear the animation loop, it seems like it is still rendering when the screen changes
                 game.playerArray = [];
+                game.projectileArray = [];
             },
             "initializeObjectArray" : function() {
                 game.playerArray[game.playerArray.length] = new SpaceShip();
@@ -188,23 +190,42 @@
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             },
             "update" : function() {
-
+                if (typeof game.projectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.projectileArray.length-1; i++) {
+                        game.projectileArray[i].update();
+                    }
+                }
             },
             "render" : function() {
                 for (var i=0; i<game.playerArray.length; i++) {
                     game.bufferCanvasCtx.drawImage(game['img'][game.playerArray[i].image], game.playerArray[i].x, game.playerArray[i].y, game.playerArray[i].w, game.playerArray[i].h);
                 }
+                if (typeof game.projectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.projectileArray.length-1; i++) {
+                        game.bufferCanvasCtx.fillStyle = "white";
+                        game.bufferCanvasCtx.fillRect(game.projectileArray[i].x, game.projectileArray[i].y, game.projectileArray[i].w, game.projectileArray[i].h);
+                    }
+                }
             },
             "events" : [
                 {"event" : "mousedown", "action" : function() {
-                    game.playerArray[0].fire();
+                    sideScrollLevel.fire(game.playerArray[0].weapon);
                 }},
                 {"event" : "mousemove", "action" : function(e) {
                     if (typeof game.playerArray[0] !== "undefined") {
                        game.playerArray[0].y = e.pageY;
                     }
                 }}
-            ]
+            ],
+           "fire" : function(weapon) {
+               switch(weapon) {
+                   case "peaShooter":
+                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, 10, "white", function () {this.x += this.velx});
+                       break;
+                   default:
+                       break;
+               }
+           }
        }
 
        var SpaceShip = function () {
@@ -213,10 +234,19 @@
            this.w = 120;
            this.h = 60;
            this.image = "spaceShipA";
-           this.fire = function() {
-               alert("bang bang");
-           }
+           this.weapon = "peaShooter";
        }
+
+        var Blast = function (x, velx, y, vely, w, h, color, update) {
+           this.x = x;
+           this.velx = velx;
+           this.y = y;
+           this.vely = vely;
+           this.w = w;
+           this.h = h;
+           this.color = color;
+           this.update = update;
+        }
 
         var game = new Game();
         game.loadImage();
