@@ -196,7 +196,9 @@
                 }
             },
             "events" : [
-                {"event" : "mousedown", "action" : function() {game.loadGameLoop("secondScreen");}},
+                {"event" : "mousedown", "action" : function() {
+                    game.playerArray[0].fire();
+                }},
                 {"event" : "mousemove", "action" : function(e) {
                     if (typeof game.playerArray[0] !== "undefined") {
                        game.playerArray[0].y = e.pageY;
@@ -206,11 +208,14 @@
        }
 
        var SpaceShip = function () {
-            this.x = 0;
-            this.y = canvas.height/2;
-            this.w = 120;
-            this.h = 60;
-            this.image = "spaceShipA";
+           this.x = 0;
+           this.y = canvas.height/2;
+           this.w = 120;
+           this.h = 60;
+           this.image = "spaceShipA";
+           this.fire = function() {
+               alert("bang bang");
+           }
        }
 
         var game = new Game();
