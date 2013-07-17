@@ -193,6 +193,7 @@
             },
             "generateEnemy" : function () {
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Enemy(100, 100, "bigBloaterA", function() {this.x -= 5;});
+                console.log(game.opponentArray.length);
             },
             "clearObjectArray" : function () {
                 game.playerArray = [];
@@ -206,7 +207,7 @@
                 game.bufferCanvasCtx.fillStyle = "black";
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             },
-            "update" : function() {
+            "update" : function() {  // TODO: see if these functions can be refactored
                 // Projectiles
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
@@ -221,6 +222,10 @@
                 if (typeof game.opponentArray[0] !== "undefined") {
                     for (var i=0; i<=game.opponentArray.length-1; i++) {
                         game.opponentArray[i].update();
+                    }
+                    // Remove enemies that have flown off the screen
+                    for (var i=0; i<=game.opponentArray.length-1; i++) {
+                        if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);
                     }
                 }
             },
