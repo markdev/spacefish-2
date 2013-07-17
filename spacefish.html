@@ -69,7 +69,7 @@
                                     {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
                                             ]
                             },
-                            levelOne : {  
+                            levelOne : {
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea"
                             },
@@ -107,14 +107,16 @@
                         this.events.shift();
                     }
                 }
-                // load this.events and add handlers            //TODO: add a condition that loads from gameLoop function
+                // load this.events and add handlers
                 if (this.events.length == 0) {
-                    if (spaceFishData[gameScreen].hasOwnProperty('events')) {
+                    // load from game data
+                    if (spaceFishData[gameScreen].hasOwnProperty('events')) {       // TODO: see if these two if/for loops can be refactored
                         for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
-                            this.events[i] = spaceFishData[gameScreen]['events'][i];
-                            game.addListeners(this.events[i]);
+                            this.events[this.events.length] = spaceFishData[gameScreen]['events'][i];
+                            game.addListeners(this.events[this.events.length-1]);
                         }
                     }
+                    // load from level function
                     if (window[spaceFishData[gameScreen].type].hasOwnProperty('events')) {
                         for (var i=0; i<=window[spaceFishData[gameScreen].type].events.length-1; i++) {
                             this.events[this.events.length] = window[spaceFishData[gameScreen].type]['events'][i];
