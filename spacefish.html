@@ -181,7 +181,7 @@
                 game.projectileArray = [];
             },
             "initializeObjectArray" : function() {
-                game.playerArray[game.playerArray.length] = new SpaceShip();
+                game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -224,36 +224,37 @@
            "fire" : function(weapon) {
                switch(weapon) {
                    case "peaShooter":
-                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
+                       game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
                        break;
                    case "dualLaser":    // TODO: fix the array shifting
-                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
-                       game.projectileArray[game.projectileArray.length] = new Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
+                       game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
+                       game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
                        break;
                    default:
                        break;
                }
+           },
+
+           // GAME OBJECTS
+           "SpaceShip" : function () {
+               this.x = 0;
+               this.y = canvas.height/2;
+               this.w = 120;
+               this.h = 60;
+               this.image = "spaceShipA";
+               this.weapon = "dualLaser";
+           },
+
+           "Blast" : function (x, velx, y, vely, radius, color, update) {
+               this.x = x;
+               this.velx = velx;
+               this.y = y;
+               this.vely = vely;
+               this.radius = radius;
+               this.color = color;
+               this.update = update;
            }
        }
-
-       var SpaceShip = function () {
-           this.x = 0;
-           this.y = canvas.height/2;
-           this.w = 120;
-           this.h = 60;
-           this.image = "spaceShipA";
-           this.weapon = "dualLaser";
-       }
-
-        var Blast = function (x, velx, y, vely, radius, color, update) {
-           this.x = x;
-           this.velx = velx;
-           this.y = y;
-           this.vely = vely;
-           this.radius = radius;
-           this.color = color;
-           this.update = update;
-        }
 
         var game = new Game();
         game.loadImage();
