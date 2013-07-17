@@ -189,10 +189,10 @@
             "initialize" : function() {
                 this.clearObjectArray();
                 this.initializeObjectArray();
-                game.intervals[game.intervals.length] = setInterval(this.generateEnemy, 1000);
+                game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
             },
-            "generateEnemy" : function () {
-                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Enemy(100, 100, "bigBloaterA", function() {this.x -= 5;});
+            "generateOpponent" : function () {
+                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, "bigBloaterA", function() {this.x -= 5;});
                 console.log(game.opponentArray.length);
             },
             "clearObjectArray" : function () {
@@ -292,7 +292,7 @@
                this.update = update;
            },
 
-           "Enemy" : function (w, h, img, update) {
+           "Opponent" : function (w, h, img, update) {
                this.w = w;
                this.h = h;
                this.x = canvas.width;
