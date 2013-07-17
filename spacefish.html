@@ -26,11 +26,9 @@
             this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
             this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
             this.bufferCanvasCtx.canvas.height = this.ctx.canvas.height;
-       //     this.objects = [];
 
             this.playerArray = [];
             this.projectileArray = [];
-
 
             this.events = [];
             this.score = 0;
@@ -193,13 +191,10 @@
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
-                        // if it exceeds canvas width, remove the blast from array
-
                     }
+                    // Remove blasts from projectileArray when they fly off the screen
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
-                        if (game.projectileArray[i].x > canvas.width) {
-                            game.projectileArray.splice(i,1);
-                        }
+                        if (game.projectileArray[i].x > canvas.width)  game.projectileArray.splice(i,1);
                     }
                 }
             },
