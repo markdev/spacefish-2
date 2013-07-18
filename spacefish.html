@@ -201,7 +201,7 @@
                 game.opponentArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
-                setTimeout(function() {game.loadGameLoop("secondScreen")}, 3000);
+             //   setTimeout(function() {game.loadGameLoop("secondScreen")}, 3000);
             },
             "generateOpponent" : function () {
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, 5, "bigBloaterA", function() {this.x -= this.velx;});   // TODO: figure out why the speed accumulates
@@ -215,7 +215,7 @@
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
-                        game.projectileArray[i].detectCollision();
+                        game.projectileArray[i].detectCollision(i);
                     }
                     // Remove blasts from projectileArray when they fly off the screen
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
@@ -296,7 +296,15 @@
                this.radius = radius;
                this.color = color;
                this.update = update;
-               this.detectCollision = function() {};
+               this.detectCollision = function(blastId) {
+                   for (var i=0; i<=game.opponentArray.length-1; i++) {
+                       if (this.x > game.opponentArray[i].x && this.x < game.opponentArray[i].x + game.opponentArray[i].w &&
+                           this.y > game.opponentArray[i].y && this.y < game.opponentArray[i].y + game.opponentArray[i].h) {
+                           game.opponentArray.splice(i,1);
+                           game.projectileArray.splice(blastId,1);
+                       }
+                   }
+               };
            },
 
            "Opponent" : function (w, h, velx, img, update) {
