@@ -226,6 +226,7 @@
                 if (typeof game.opponentArray[0] !== "undefined") {
                     for (var i=0; i<=game.opponentArray.length-1; i++) {
                         game.opponentArray[i].update();
+                        game.opponentArray[i].detectCollision(i);
                     }
                     // Remove enemies that have flown off the screen
                     for (var i=0; i<=game.opponentArray.length-1; i++) {
@@ -274,6 +275,18 @@
                        break;
                }
             },
+           "hitSpaceShip" : function(opponentId) {
+               sideScrollLevel.killPlayer();
+           },
+           "killPlayer" : function() {
+               game.lives -= 1;
+               if (game.lives > 0) {
+                   alert(game.lives + ' lives left');
+                   game.loadGameLoop("levelOne");
+               } else {
+                   alert("game over");
+               }
+           },
 
            /*
             *    Game Objects
@@ -315,6 +328,14 @@
                this.y = Math.random() * canvas.height - this.h;
                this.img = img;
                this.update = update;
+               this.detectCollision = function(opponentId) {
+                   if (  game.playerArray[0].x + game.playerArray[0].w/2 > game.opponentArray[opponentId].x &&
+                         game.playerArray[0].x < game.opponentArray[opponentId].x + game.opponentArray[opponentId].w &&
+                         game.playerArray[0].y + game.playerArray[0].h > game.opponentArray[opponentId].y &&
+                         game.playerArray[0].y < game.opponentArray[opponentId].y + game.opponentArray[opponentId].h) {
+                         sideScrollLevel.hitSpaceShip(opponentId);
+                   }
+               };
            }
        }
 
