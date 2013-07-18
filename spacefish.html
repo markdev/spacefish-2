@@ -68,9 +68,7 @@
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne", function () {
-                                        removeGameLoop();
-                                    })}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
                                             ]
                             },
                             levelOne : {
@@ -83,14 +81,13 @@
                                 "background" : "youWin",
                                 "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen", function () {
-                                        removeGameLoop(); })}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}}
                                             ]
                             }
                         }
                         // --> move this into a script later
-                        game.gameLoop = new GameLoop("splashScreen");
-                        game.loadGameLoop("splashScreen", function() {});
+                        game.gameLoop = new GameLoop("nullScreen");           // TODO: This is a hideous solution to not being able to call game.gameLoop.cancelAnimationFrame conditionally
+                        game.loadGameLoop("splashScreen");
                     }
                 };
             },
@@ -103,13 +100,9 @@
                 game.canvas.addEventListener(listener.event, listener.action);
             },
 
-            loadGameLoop : function(gameScreen, cancelLoop) {
-                //cancelLoop();
-
-                if (typeof game.gameLoop !== undefined) {
-                    (function() { game.gameLoop.cancelAnimationFrame = true; } ())
-                }
-
+            loadGameLoop : function(gameScreen) {
+                // start gameLoop
+                game.gameLoop.cancelAnimationFrame = true; // TODO: find a way to do this conditionally, without having to load the null screen
                 gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
 
@@ -145,7 +138,11 @@
                 extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
 
                 // clear all the existing intervals
-                this.gameLoop.clearIntervals();
+                if (typeof game.intervals[0] !== 'undefined') {
+                    for (var i=0; i<=game.intervals.length-1; i++) {
+                        clearInterval(game.intervals[i]);
+                    }
+                }
 
                 // start this shit
                 this.gameLoop.initialize();
@@ -158,13 +155,6 @@
        var GameLoop = function(level) {
             var self = this;
             this.cancelAnimationFrame = false;
-            this.clearIntervals = function () {  // TODO: See if this can be removed altogether
-                if (typeof game.intervals[0] !== 'undefined') {
-                    for (var i=0; i<=game.intervals.length-1; i++) {
-                        clearInterval(game.intervals[i]);
-                    }
-                }
-            };
             this.initialize = function() {};
             this.clearScreen = function() {};
             this.update = function() {};
@@ -183,6 +173,12 @@
             };
        }
 
+       /*
+       *    GameLoop Level Types
+       *
+        */
+       var nullScreen = {};
+
        var basicSplashScreen = {
             "clearScreen" : function() {
                 game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
@@ -198,12 +194,6 @@
             }
        }
 
-       function removeGameLoop() {
-           if (typeof game.gameLoop !== undefined) {
-                game.gameLoop.cancelAnimationFrame = true;
-           }
-       }
-
        var sideScrollLevel = {
             "initialize" : function() {
                 game.playerArray = [];
@@ -211,9 +201,7 @@
                 game.opponentArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
-                setTimeout(function() {game.loadGameLoop("secondScreen", function() {
-                    removeGameLoop();
-                })}, 3000);
+                setTimeout(function() {game.loadGameLoop("secondScreen")}, 3000);
             },
             "generateOpponent" : function () {
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, 5, "bigBloaterA", function() {this.x -= this.velx;});   // TODO: figure out why the speed accumulates
@@ -286,7 +274,10 @@
                }
             },
 
-           // GAME OBJECTS
+           /*
+            *    Game Objects
+            *
+            */
            "SpaceShip" : function () {
                this.x = 0;
                this.y = canvas.height/2;
