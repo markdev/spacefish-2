@@ -50,7 +50,7 @@
             ];
         };
 
-       Game.prototype = {
+        Game.prototype = {
             loadImage : function loadImage(i) {     // naming this function makes it accessible only for self-reference; it is not globally accessible
                 i = (typeof i !== 'undefined') ? i : 0;
                 var image = new Image();
@@ -68,7 +68,9 @@
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne", function () { if (typeof game.gameLoop !== undefined) {
+                                        game.gameLoop.cancelAnimationFrame = true;
+                                    }})}}
                                             ]
                             },
                             levelOne : {
@@ -81,12 +83,13 @@
                                 "background" : "youWin",
                                 "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen", function () { if (typeof game.gameLoop !== undefined) {
+                                        game.gameLoop.cancelAnimationFrame = true;}})}}
                                             ]
                             }
                         }
                         // --> move this into a script later
-                        game.loadGameLoop();
+                        game.loadGameLoop("splashScreen", function() {});
                     }
                 };
             },
@@ -99,7 +102,9 @@
                 game.canvas.addEventListener(listener.event, listener.action);
             },
 
-            loadGameLoop : function(gameScreen) {
+            loadGameLoop : function(gameScreen, cancelLoop) {
+                cancelLoop();
+
                 gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
 
@@ -147,6 +152,7 @@
 
        var GameLoop = function(level) {
             var self = this;
+            this.cancelAnimationFrame = false;
             this.clearIntervals = function () {  // TODO: See if this can be removed altogether
                 if (typeof game.intervals[0] !== 'undefined') {
                     for (var i=0; i<=game.intervals.length-1; i++) {
@@ -166,7 +172,9 @@
                 self.update();
                 self.render();
                 self.drawbuffer();
-                requestAnimationFrame(self.animate);
+                if (self.cancelAnimationFrame == false) {
+                    requestAnimationFrame(self.animate);   //TODO: figure out if this is what's causing the speed increase
+                }
             };
        }
 
@@ -187,21 +195,17 @@
 
        var sideScrollLevel = {
             "initialize" : function() {
-                this.clearObjectArray();
-                this.initializeObjectArray();
-                game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
-            },
-            "generateOpponent" : function () {
-                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, "bigBloaterA", function() {this.x -= 5;});
-                console.log(game.opponentArray.length);
-            },
-            "clearObjectArray" : function () {
                 game.playerArray = [];
                 game.projectileArray = [];
                 game.opponentArray = [];
-            },
-            "initializeObjectArray" : function() {
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
+                game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
+                setTimeout(function() {game.loadGameLoop("secondScreen", function() {                if (typeof game.gameLoop !== undefined) {
+                    game.gameLoop.cancelAnimationFrame = true;
+                }})}, 3000);
+            },
+            "generateOpponent" : function () {
+                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, 5, "bigBloaterA", function() {this.x -= this.velx;});   // TODO: figure out why the speed accumulates
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -257,7 +261,7 @@
                     }
                 }}
             ],
-           "fire" : function(weapon) {
+            "fire" : function(weapon) {
                switch(weapon) {
                    case "peaShooter":
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx});
@@ -265,12 +269,11 @@
                    case "dualLaser":
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
                        game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});
-        game.loadGameLoop("secondScreen");
                        break;
                    default:
                        break;
                }
-           },
+            },
 
            // GAME OBJECTS
            "SpaceShip" : function () {
@@ -292,9 +295,10 @@
                this.update = update;
            },
 
-           "Opponent" : function (w, h, img, update) {
+           "Opponent" : function (w, h, velx, img, update) {
                this.w = w;
                this.h = h;
+               this.velx = velx;
                this.x = canvas.width;
                this.y = Math.random() * canvas.height - this.h;
                this.img = img;
