@@ -68,9 +68,9 @@
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne", function () { if (typeof game.gameLoop !== undefined) {
-                                        game.gameLoop.cancelAnimationFrame = true;
-                                    }})}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne", function () {
+                                        removeGameLoop();
+                                    })}}
                                             ]
                             },
                             levelOne : {
@@ -83,12 +83,13 @@
                                 "background" : "youWin",
                                 "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen", function () { if (typeof game.gameLoop !== undefined) {
-                                        game.gameLoop.cancelAnimationFrame = true;}})}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen", function () {
+                                        removeGameLoop(); })}}
                                             ]
                             }
                         }
                         // --> move this into a script later
+                        game.gameLoop = new GameLoop("splashScreen");
                         game.loadGameLoop("splashScreen", function() {});
                     }
                 };
@@ -103,7 +104,11 @@
             },
 
             loadGameLoop : function(gameScreen, cancelLoop) {
-                cancelLoop();
+                //cancelLoop();
+
+                if (typeof game.gameLoop !== undefined) {
+                    (function() { game.gameLoop.cancelAnimationFrame = true; } ())
+                }
 
                 gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
@@ -193,6 +198,12 @@
             }
        }
 
+       function removeGameLoop() {
+           if (typeof game.gameLoop !== undefined) {
+                game.gameLoop.cancelAnimationFrame = true;
+           }
+       }
+
        var sideScrollLevel = {
             "initialize" : function() {
                 game.playerArray = [];
@@ -200,9 +211,9 @@
                 game.opponentArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
-                setTimeout(function() {game.loadGameLoop("secondScreen", function() {                if (typeof game.gameLoop !== undefined) {
-                    game.gameLoop.cancelAnimationFrame = true;
-                }})}, 3000);
+                setTimeout(function() {game.loadGameLoop("secondScreen", function() {
+                    removeGameLoop();
+                })}, 3000);
             },
             "generateOpponent" : function () {
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, 5, "bigBloaterA", function() {this.x -= this.velx;});   // TODO: figure out why the speed accumulates
