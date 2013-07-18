@@ -33,6 +33,9 @@
 
             this.intervals = [];
 
+            this.time = 0;
+            this.startTime = 0;
+
             this.currentLevel = "";
             this.events = [];
             this.score = 0;
@@ -75,7 +78,8 @@
                             levelOne : {
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea",
-                                "enemies" : ["Bill", "Sam"]
+                                "timer" : 20,
+                                "opponents" : ["Bill", "Sam"]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -119,6 +123,9 @@
                 game.gameLoop.cancelAnimationFrame = true;          // TODO: find a way to do this conditionally, without having to load the null screen
                 var gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 game.currentLevel = gameScreen;
+                var d = new Date();
+                var n = String(d.getTime());
+                game.startTime = n.substring(10);
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
 
                 // remove all the event handlers and empty this.events
@@ -177,13 +184,15 @@
             this.drawbuffer = function() {
                 game.ctx.drawImage(game.bufferCanvas, 0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
             };
-            this.animate = function() {
+            this.animate = function(time) {
+                game.time = time;
                 self.clearScreen();
                 self.update();
                 self.render();
                 self.drawbuffer();
+                console.log(time);
                 if (self.cancelAnimationFrame == false) {
-                    requestAnimationFrame(self.animate);   //TODO: figure out if this is what's causing the speed increase
+                    requestAnimationFrame(self.animate);
                 }
             };
        }
@@ -218,7 +227,7 @@
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
             },
             "generateOpponent" : function () {
-                var opponentName = spaceFishData[game.currentLevel]['enemies'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['enemies'].length)];
+                var opponentName = spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)];
                 switch (opponentName) {
                     case "Bill":
                         game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(300, 150, 15, "bigBloaterA", function() {this.x -= this.velx;});
@@ -250,7 +259,7 @@
                         game.opponentArray[i].update();
                         game.opponentArray[i].detectCollision(i);
                     }
-                    // Remove enemies that have flown off the screen
+                    // Remove opponents that have flown off the screen
                     for (var i=0; i<=game.opponentArray.length-1; i++) {
                         if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);
                     }
@@ -273,6 +282,10 @@
                         game.bufferCanvasCtx.drawImage(game['img'][game.opponentArray[i].img], game.opponentArray[i].x, game.opponentArray[i].y, game.opponentArray[i].w, game.opponentArray[i].h);
                     }
                 }
+                // render time // TODO make this sensible
+                game.bufferCanvasCtx.font = "20pt Arial";
+                game.bufferCanvasCtx.fillStyle = "white";
+                game.bufferCanvasCtx.fillText(String(game.time - game.startTime).substring(0,2), 100, 100);
             },
             "events" : [
                 {"event" : "mousedown", "action" : function() {
