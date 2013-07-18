@@ -33,6 +33,7 @@
 
             this.intervals = [];
 
+            this.currentLevel = "";
             this.events = [];
             this.score = 0;
             this.lives = 3;
@@ -116,7 +117,8 @@
             loadGameLoop : function(gameScreen) {
                 // start gameLoop
                 game.gameLoop.cancelAnimationFrame = true;          // TODO: find a way to do this conditionally, without having to load the null screen
-                gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
+                var gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
+                game.currentLevel = gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
 
                 // remove all the event handlers and empty this.events
@@ -214,10 +216,17 @@
                 game.opponentArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
-             //   setTimeout(function() {game.loadGameLoop("secondScreen")}, 3000);
             },
             "generateOpponent" : function () {
-                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(100, 100, 5, "bigBloaterA", function() {this.x -= this.velx;});   // TODO: figure out why the speed accumulates
+                var opponentName = spaceFishData[game.currentLevel]['enemies'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['enemies'].length)];
+                switch (opponentName) {
+                    case "Bill":
+                        game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(300, 150, 15, "bigBloaterA", function() {this.x -= this.velx;});
+                        break;
+                    case "Sam":
+                        game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(150, 75, 20, "speedyBlueA", function() {this.x -= this.velx;});
+                        break;
+                }
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
