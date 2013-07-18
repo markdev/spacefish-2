@@ -68,7 +68,7 @@
                                 "background" : "startScreen",
                                 "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne")}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne");}}
                                             ]
                             },
                             levelOne : {
@@ -81,15 +81,28 @@
                                 "background" : "youWin",
                                 "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                                 "events" : [
-                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen")}}
+                                    {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen");}}
                                             ]
+                            },
+                            loseScreen : {
+                                "type" : "basicSplashScreen",
+                                "background" : "youLose",
+                                "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
+                                "events" : [
+                                    {"event" : "mousedown", "action" : function() {game.initialize();}}
+                                ]
                             }
                         }
                         // --> move this into a script later
-                        game.gameLoop = new GameLoop("nullScreen");           // TODO: This is a hideous solution to not being able to call game.gameLoop.cancelAnimationFrame conditionally
-                        game.loadGameLoop("splashScreen");
+                        game.initialize();
                     }
                 };
+            },
+
+            initialize : function() {
+                game.lives = 3;
+                game.gameLoop = new GameLoop("nullScreen");           // TODO: This is a hideous solution to not being able to call game.gameLoop.cancelAnimationFrame conditionally
+                game.loadGameLoop("splashScreen");
             },
 
             removeListeners : function(listener) {
@@ -102,7 +115,7 @@
 
             loadGameLoop : function(gameScreen) {
                 // start gameLoop
-                game.gameLoop.cancelAnimationFrame = true; // TODO: find a way to do this conditionally, without having to load the null screen
+                game.gameLoop.cancelAnimationFrame = true;          // TODO: find a way to do this conditionally, without having to load the null screen
                 gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
                 this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
 
@@ -284,7 +297,7 @@
                    alert(game.lives + ' lives left');
                    game.loadGameLoop("levelOne");
                } else {
-                   alert("game over");
+                   game.loadGameLoop("loseScreen");
                }
            },
 
