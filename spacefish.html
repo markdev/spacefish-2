@@ -215,6 +215,7 @@
                 if (typeof game.projectileArray[0] !== "undefined") {
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
                         game.projectileArray[i].update();
+                        game.projectileArray[i].detectCollision();
                     }
                     // Remove blasts from projectileArray when they fly off the screen
                     for (var i=0; i<=game.projectileArray.length-1; i++) {
@@ -295,6 +296,7 @@
                this.radius = radius;
                this.color = color;
                this.update = update;
+               this.detectCollision = function() {};
            },
 
            "Opponent" : function (w, h, velx, img, update) {
