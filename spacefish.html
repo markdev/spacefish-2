@@ -79,7 +79,7 @@
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea",
                                 "timer" : 20,
-                                "opponents" : ["Homer"]
+                                "opponents" : ["CrabCakes"]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -365,8 +365,9 @@
                this.w = opponentData.w;
                this.h = opponentData.h;
                this.velx = opponentData.velx;
+               this.vely = opponentData.vely;
                this.x = canvas.width;
-               this.y = Math.random() * canvas.height - this.h;
+               this.y = Math.random() * (canvas.height - this.h);
                this.img = opponentData.img;
                this.update = opponentData.update;
                this.detectCollision = function(opponentId) {
@@ -410,11 +411,17 @@
                "Luciano" : { "name" : "Luciano", "w" : 200, "h" : 300, "velx" : 25, "img" : "sinusoidSwimmerA", "item" : "shockWave", "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}},
             // TODO: Fill in items below this line
                "Homer" : { "name" : "Homer", "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "dualLaser", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
-            // TODO: Finish the data below this line.
-               "Darren" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
-               "Dylan" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
-               "Frank" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
-               "CrabCakes" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
+               "Darren" : { "name" : "Darren", "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}, // TODO: Fix Darren to activate dylan
+               "Dylan" : { "name" : "Dylan", "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
+               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
+               "CrabCakes" : { "name" : "CrabCakes", "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "dualLaser", "update" : function() {
+                   this.x -= this.velx;
+                   if (this.x < 0) this.velx = -this.velx;
+                   if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx;
+                   this.y -= this.vely;
+                   if (this.y < 0) this.vely = -this.vely;
+                   if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;
+               }}
            },
            "ItemData" : {
                "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].weapon = "peaShooter";}},
