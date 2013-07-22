@@ -232,8 +232,7 @@
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][opponentName]);
             },
             "generateItem" : function (opponentName, x, y) {
-                game.itemArray[game.itemArray.length] = new sideScrollLevel.Item(opponentName, x, y);
-                //console.log(game.itemArray);
+                game.itemArray[game.itemArray.length] = new sideScrollLevel.Item(opponentName, x, y, sideScrollLevel['ItemData'][sideScrollLevel['OpponentData'][opponentName]["item"]]);
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -393,13 +392,13 @@
                };
            },
 
-           "Item" : function(name, x, y) {  // TODO: make this dynamic so that it is called by the opponent
+           "Item" : function(name, x, y, itemData) {  // TODO: make this dynamic so that it is called by the opponent
                this.name = name;
                this.x = x;
                this.y = y;
                this.w = 40; // TODO: change this to a radius maybe
                this.h = 40;
-               this.img = "orbmega";
+               this.img = itemData.img;
                this.update = function () {
                     this.x -= 4;
                };
@@ -424,9 +423,9 @@
                "Bill" : { "name" : "Bill", "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
                "Sam" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}
            },
-
            "ItemData" : {
-                "mega" : {"name" : "Mega"}
+               "mega" : {"name" : "Mega", "img" : "orbmega"},
+               "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser"}
            }
 
        }
