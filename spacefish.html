@@ -190,7 +190,7 @@
                 self.update();
                 self.render();
                 self.drawbuffer();
-                console.log(time);
+       //         console.log(time);
                 if (self.cancelAnimationFrame == false) {
                     requestAnimationFrame(self.animate);
                 }
@@ -228,14 +228,10 @@
             },
             "generateOpponent" : function () {
                 var opponentName = spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)];
-                switch (opponentName) {
-                    case "Bill":
-                        game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(300, 150, 15, "bigBloaterA", function() {this.x -= this.velx;});
-                        break;
-                    case "Sam":
-                        game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(150, 75, 20, "speedyBlueA", function() {this.x -= this.velx;});
-                        break;
-                }
+                game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][opponentName]);
+            },
+            "generateItem" : function (opponentName) {
+             //   var item = 
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -324,7 +320,7 @@
            },
 
            /*
-            *    Game Objects
+            *    Game Object Prototypes
             *
             */
            "SpaceShip" : function () {
@@ -348,6 +344,7 @@
                    for (var i=0; i<=game.opponentArray.length-1; i++) {
                        if (this.x > game.opponentArray[i].x && this.x < game.opponentArray[i].x + game.opponentArray[i].w &&
                            this.y > game.opponentArray[i].y && this.y < game.opponentArray[i].y + game.opponentArray[i].h) {
+                           sideScrollLevel.generateItem(game.opponentArray[i].name, game.opponentArray[i].x, game.opponentArray[i].y);
                            game.opponentArray.splice(i,1);
                            game.projectileArray.splice(blastId,1);
                        }
@@ -355,14 +352,15 @@
                };
            },
 
-           "Opponent" : function (w, h, velx, img, update) {
-               this.w = w;
-               this.h = h;
-               this.velx = velx;
+           "Opponent" : function (opponentData) {
+               this.name = opponentData.name;
+               this.w = opponentData.w;
+               this.h = opponentData.h;
+               this.velx = opponentData.velx;
                this.x = canvas.width;
                this.y = Math.random() * canvas.height - this.h;
-               this.img = img;
-               this.update = update;
+               this.img = opponentData.img;
+               this.update = opponentData.update;
                this.detectCollision = function(opponentId) {
                    if (  game.playerArray[0].x + game.playerArray[0].w/2 > game.opponentArray[opponentId].x &&
                          game.playerArray[0].x < game.opponentArray[opponentId].x + game.opponentArray[opponentId].w &&
@@ -371,7 +369,23 @@
                          sideScrollLevel.hitSpaceShip(opponentId);
                    }
                };
+           },
+
+           "Item" : function(name, x, y) {
+               this.name = name;
+               this.x = x;
+               this.y = y;
+           },
+
+           /*
+           *    Game Object Data
+           *
+            */
+           "OpponentData" : {
+               "Bill" : { "name" : "Bill", "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
+               "Sam" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}
            }
+
        }
 
         var game = new Game();
