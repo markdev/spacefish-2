@@ -223,6 +223,7 @@
                 game.playerArray = [];
                 game.projectileArray = [];
                 game.opponentArray = [];
+                game.itemArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
                 game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
             },
@@ -230,8 +231,9 @@
                 var opponentName = spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)];
                 game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][opponentName]);
             },
-            "generateItem" : function (opponentName) {
-             //   var item = 
+            "generateItem" : function (opponentName, x, y) {
+                game.itemArray[game.itemArray.length] = new sideScrollLevel.Item(opponentName, x, y);
+                //console.log(game.itemArray);
             },
             "clearScreen" : function() {
                 game.bufferCanvasCtx.fillStyle = "black";
@@ -260,6 +262,16 @@
                         if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);
                     }
                 }
+                // Items
+                if (typeof game.itemArray[0] !== "undefined") {
+                    for (var i=0; i<=game.itemArray.length-1; i++) {
+                        game.itemArray[i].update();
+                    }
+                    // Remove opponents that have flown off the screen
+                    for (var i=0; i<=game.itemArray.length-1; i++) {
+                        if (game.itemArray[i].x < 0) game.itemArray.splice(i,1);
+                    }
+                }
             },
             "render" : function() {
                 for (var i=0; i<game.playerArray.length; i++) {
@@ -278,6 +290,12 @@
                         game.bufferCanvasCtx.drawImage(game['img'][game.opponentArray[i].img], game.opponentArray[i].x, game.opponentArray[i].y, game.opponentArray[i].w, game.opponentArray[i].h);
                     }
                 }
+                if (typeof game.itemArray[0] !== "undefined") {
+                    for (var i=0; i<=game.itemArray.length-1; i++) {
+                        game.bufferCanvasCtx.drawImage(game['img'][game.itemArray[i].img], game.itemArray[i].x, game.itemArray[i].y, 40, 40);
+                    }
+                }
+                console.log(game.itemArray.length);
                 // render time // TODO make this sensible
                 game.bufferCanvasCtx.font = "20pt Arial";
                 game.bufferCanvasCtx.fillStyle = "white";
@@ -312,7 +330,7 @@
            "killPlayer" : function() {
                game.lives -= 1;
                if (game.lives > 0) {
-                   alert(game.lives + ' lives left');
+           //        alert(game.lives + ' lives left');
                    game.loadGameLoop("levelOne");
                } else {
                    game.loadGameLoop("loseScreen");
@@ -375,6 +393,11 @@
                this.name = name;
                this.x = x;
                this.y = y;
+               this.radius = 20;
+               this.img = "orbmega";
+               this.update = function () {
+                   this.x -= 4;
+               };
            },
 
            /*
@@ -384,6 +407,10 @@
            "OpponentData" : {
                "Bill" : { "name" : "Bill", "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
                "Sam" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}
+           },
+
+           "ItemData" : {
+                "mega" : {"name" : "Mega"}
            }
 
        }
