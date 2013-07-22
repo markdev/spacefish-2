@@ -266,10 +266,11 @@
                 if (typeof game.itemArray[0] !== "undefined") {
                     for (var i=0; i<=game.itemArray.length-1; i++) {
                         game.itemArray[i].update();
+                        game.itemArray[i].detectCollision(i);
                     }
                     // Remove opponents that have flown off the screen
                     for (var i=0; i<=game.itemArray.length-1; i++) {
-                        if (game.itemArray[i].x < 0) game.itemArray.splice(i,1);
+                        if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);
                     }
                 }
             },
@@ -292,10 +293,9 @@
                 }
                 if (typeof game.itemArray[0] !== "undefined") {
                     for (var i=0; i<=game.itemArray.length-1; i++) {
-                        game.bufferCanvasCtx.drawImage(game['img'][game.itemArray[i].img], game.itemArray[i].x, game.itemArray[i].y, 40, 40);
+                        game.bufferCanvasCtx.drawImage(game['img'][game.itemArray[i].img], game.itemArray[i].x, game.itemArray[i].y, game.itemArray[i].w, game.itemArray[i].h);
                     }
                 }
-                console.log(game.itemArray.length);
                 // render time // TODO make this sensible
                 game.bufferCanvasCtx.font = "20pt Arial";
                 game.bufferCanvasCtx.fillStyle = "white";
@@ -335,6 +335,10 @@
                } else {
                    game.loadGameLoop("loseScreen");
                }
+           },
+           "loadItem" : function(itemId) {
+               game.itemArray[itemId].action();
+               game.itemArray.splice(itemId,1);
            },
 
            /*
@@ -389,15 +393,27 @@
                };
            },
 
-           "Item" : function(name, x, y) {
+           "Item" : function(name, x, y) {  // TODO: make this dynamic so that it is called by the opponent
                this.name = name;
                this.x = x;
                this.y = y;
-               this.radius = 20;
+               this.w = 40; // TODO: change this to a radius maybe
+               this.h = 40;
                this.img = "orbmega";
                this.update = function () {
-                   this.x -= 4;
+                    this.x -= 4;
                };
+               this.action = function () {
+                    game.playerArray[0].weapon = "peaShooter";
+               };
+               this.detectCollision = function(itemId) {
+                    if ( game.playerArray[0].x + game.playerArray[0].w/2 > game.itemArray[itemId].x &&
+                         game.playerArray[0].x < game.itemArray[itemId].x + game.itemArray[itemId].w &&
+                         game.playerArray[0].y + game.playerArray[0].h > game.itemArray[itemId].y &&
+                         game.playerArray[0].y < game.itemArray[itemId].y + game.itemArray[itemId].h) {
+                         sideScrollLevel.loadItem(itemId);
+                    }
+               }
            },
 
            /*
