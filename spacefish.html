@@ -312,7 +312,7 @@
                 }}
             ],
            "hitSpaceShip" : function(opponentId) {
-               game.playerArray[0].adjustMode("getHit");
+               game.playerArray[0].getHit();
                game.opponentArray.splice(opponentId, 1);
            //    if (game.playerArray[0].health < 1) sideScrollLevel.killPlayer();
            },
@@ -343,40 +343,33 @@
                this.mode = "normal";
                this.image = "spaceShipA";
                this.weapon = "dualLaser";
-               this.adjustMode = function (condition) {
-                   var currentMode = this.mode; // TODO: fix this stupidity
-                   switch (condition) {
-                       case "getHit":
-                            if (currentMode == "mega") {
-                                this.mode = "normal";
-                                this.h = 60;
-                                this.w = 120;
-                                this.health = 1;
-                                this.image = "spaceShipA";
-                                break;
-                            } else if (currentMode == "drill") {
-                                // nothing happens!  //TODO: add effect?
-                            } else if (currentMode == "normal") {
-                                this.health -= 1;
-                                sideScrollLevel.killPlayer();
-                                break;
-                            }
-                            break;
-                       case "megaMode":
-                           this.mode = "mega";
-                           this.h = 80;
-                           this.w = 120;
-                           this.health = 2;
-                           this.image = "spaceShipMegaA";
-                           break;
-                       case "drillMode":
-                           this.mode = "drill";
-                           this.h = 60;
-                           this.w = 145;
-                           this.health = 1;
-                           this.image = "spaceShipShieldA";
-                           break;
+               this.getHit = function () {
+                   if (this.mode == "mega") {
+                       this.mode = "normal";
+                       this.h = 60;
+                       this.w = 120;
+                       this.health = 1;
+                       this.image = "spaceShipA";
+                   } else if (this.mode == "drill") {
+                       // nothing happens!  //TODO: add effect?
+                   } else if (this.mode == "normal") {
+                       this.health -= 1;
+                       sideScrollLevel.killPlayer();
                    }
+               };
+               this.megaMode = function () {
+                   this.mode = "mega";
+                   this.h = 80;
+                   this.w = 120;
+                   this.health = 2;
+                   this.image = "spaceShipMegaA";
+               };
+               this.drillMode = function () {
+                   this.mode = "drill";
+                   this.h = 60;
+                   this.w = 145;
+                   this.health = 1;
+                   this.image = "spaceShipShieldA";
                }
            },
 
@@ -463,12 +456,12 @@
                }}
            },
            "ItemData" : {
-               "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].adjustMode("megaMode");}},
+               "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].megaMode();}},
                "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "action" : function () {game.playerArray[0].weapon = "dualLaser";}},
                "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "action" : function () {game.playerArray[0].weapon = "shockWave";}},
                "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming", "action" : function () {game.playerArray[0].weapon = "homingMissile";}},
                "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy", "action" : function () {game.playerArray[0].weapon = "bouncyBalls";}},
-               "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].adjustMode("drillMode");}},
+               "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].drillMode();}},
                "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "action" : function () {game.playerArray[0].weapon = "hellFire";}}
            },
            "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
