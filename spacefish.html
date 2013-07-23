@@ -79,7 +79,7 @@
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea",
                                 "timer" : 20,
-                                "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Dylan", "Frank", "CrabCakes"]
+                                "opponents" : ["Bill", "Frank", "Dylan"]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -272,6 +272,7 @@
                         if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);
                     }
                 }
+                console.log(game.playerArray[0].mode);
             },
             "render" : function() {
                 for (var i=0; i<game.playerArray.length; i++) {
@@ -311,7 +312,9 @@
                 }}
             ],
            "hitSpaceShip" : function(opponentId) {
-               sideScrollLevel.killPlayer();
+               game.playerArray[0].adjustMode("getHit");
+               game.opponentArray.splice(opponentId, 1);
+           //    if (game.playerArray[0].health < 1) sideScrollLevel.killPlayer();
            },
            "killPlayer" : function() {
                game.lives -= 1;
@@ -336,8 +339,45 @@
                this.y = canvas.height/2;
                this.w = 120;
                this.h = 60;
+               this.health = 1;
+               this.mode = "normal";
                this.image = "spaceShipA";
                this.weapon = "dualLaser";
+               this.adjustMode = function (condition) {
+                   var currentMode = this.mode; // TODO: fix this stupidity
+                   switch (condition) {
+                       case "getHit":
+                            if (currentMode == "mega") {
+                                this.mode = "normal";
+                                this.h = 60;
+                                this.w = 120;
+                                this.health = 1;
+                                this.image = "spaceShipA";
+                                break;
+                            } else if (currentMode == "drill") {
+                                // nothing happens!  //TODO: add effect?
+                            } else if (currentMode == "normal") {
+                                this.health -= 1;
+                                sideScrollLevel.killPlayer();
+                                break;
+                            }
+                            break;
+                       case "megaMode":
+                           this.mode = "mega";
+                           this.h = 80;
+                           this.w = 120;
+                           this.health = 2;
+                           this.image = "spaceShipMegaA";
+                           break;
+                       case "drillMode":
+                           this.mode = "drill";
+                           this.h = 60;
+                           this.w = 145;
+                           this.health = 1;
+                           this.image = "spaceShipShieldA";
+                           break;
+                   }
+               }
            },
 
            "Blast" : function (velx, y, vely, radius, color, update) {
@@ -412,7 +452,7 @@
                "Homer" : { "name" : "Homer", "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "homingMissile", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
                "Darren" : { "name" : "Darren", "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}, // TODO: Fix Darren to activate dylan
                "Dylan" : { "name" : "Dylan", "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "bouncyBalls", "update" : function() {this.x -= this.velx;}},
-               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},   // TODO: Fix Frank
+               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;}},   // TODO: Fix Frank
                "CrabCakes" : { "name" : "CrabCakes", "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {
                    this.x -= this.velx;
                    if (this.x < 0) this.velx = -this.velx;
@@ -423,11 +463,12 @@
                }}
            },
            "ItemData" : {
-               "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].weapon = "peaShooter";}},
+               "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].adjustMode("megaMode");}},
                "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "action" : function () {game.playerArray[0].weapon = "dualLaser";}},
                "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "action" : function () {game.playerArray[0].weapon = "shockWave";}},
                "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming", "action" : function () {game.playerArray[0].weapon = "homingMissile";}},
                "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy", "action" : function () {game.playerArray[0].weapon = "bouncyBalls";}},
+               "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].adjustMode("drillMode");}},
                "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "action" : function () {game.playerArray[0].weapon = "hellFire";}}
            },
            "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
