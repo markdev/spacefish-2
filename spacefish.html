@@ -79,7 +79,7 @@
                                 "type" : "sideScrollLevel",
                                 "background" : "theSea",
                                 "timer" : 20,
-                                "opponents" : ["Frank", "CrabCakes"]
+                                "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Dylan", "Frank", "CrabCakes"]
                             },
                             secondScreen : {
                                 "type" : "basicSplashScreen",
@@ -409,11 +409,10 @@
                "Bill" : { "name" : "Bill", "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
                "Sam" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
                "Luciano" : { "name" : "Luciano", "w" : 200, "h" : 300, "velx" : 25, "img" : "sinusoidSwimmerA", "item" : "shockWave", "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}},
-           // TODO: Complete in items below this line
                "Homer" : { "name" : "Homer", "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "homingMissile", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
                "Darren" : { "name" : "Darren", "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}, // TODO: Fix Darren to activate dylan
                "Dylan" : { "name" : "Dylan", "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "bouncyBalls", "update" : function() {this.x -= this.velx;}},
-               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
+               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},   // TODO: Fix Frank
                "CrabCakes" : { "name" : "CrabCakes", "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {
                    this.x -= this.velx;
                    if (this.x < 0) this.velx = -this.velx;
@@ -435,10 +434,26 @@
                "peaShooter" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx})}},
                "dualLaser" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
                                                     game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});}},
-               "shockWave" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "yellow", function () {this.x += this.velx})}},
-               "homingMissile" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "red", function () {this.x += this.velx})}},
-               "bouncyBalls" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "purple", function () {this.x += this.velx})}},
-               "hellFire" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "pink", function () {this.x += this.velx})}}
+               "shockWave" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "yellow", function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;})}},
+               "homingMissile" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 20, "red", function () {
+                   if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;}
+                   this.x += this.velx;
+               })}},
+               "bouncyBalls" : {"fire" : function() { game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*2 - 1) * 10, 10, "purple", function () {
+                   this.x += this.velx;
+                   this.y += this.vely;
+                   if (this.y < 0) this.vely = -this.vely;
+                   if (this.y + this.radius > canvas.height) this.vely = -this.vely;
+                   })
+               }},
+               "hellFire" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(Math.round(Math.random()*20 - 10), game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*20 - 10), 10, "red", function () {
+                   this.x += this.velx;
+                   if (this.x < 0) this.velx = -this.velx;
+                   if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx;
+                   this.y -= this.vely;
+                   if (this.y < 0) this.vely = -this.vely;
+                   if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;
+               })}}
            }
        }
 
