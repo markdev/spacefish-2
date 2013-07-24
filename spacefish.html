@@ -216,6 +216,14 @@ var sideScrollLevel = {
         game.enemyProjectileArray = [];
         game.opponentArray = [];
         game.itemArray = [];
+        game.objectArrays = [
+            { "name" : "playerArray", "collidesWith" : "opponentArray", "removal" : function (i) {}},
+            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "removal" : function (i) {if (game.playerProjectileArray[i].x > canvas.width)  game.playerProjectileArray.splice(i,1);}},
+            { "name" : "enemyProjectileArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.enemyProjectileArray[i].x < 0)  game.enemyProjectileArray.splice(i,1);}},
+            { "name" : "opponentArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);}},
+            { "name" : "itemArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);}}
+        ];
+
         game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
         game.intervals[game.intervals.length] = setInterval(this.generateOpponent, 1000);
     },
@@ -230,33 +238,25 @@ var sideScrollLevel = {
         game.bufferCanvasCtx.fillStyle = "black";
         game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
     },
-    "update" : function() {  // TODO: see if these functions can be refactored
-        var updateObjects = [
-            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "removal" : function () {if (game.playerProjectileArray[i].x > canvas.width)  game.playerProjectileArray.splice(i,1);}},
-            { "name" : "enemyProjectileArray", "collidesWith" : "playerArray", "removal" : function () {if (game.enemyProjectileArray[i].x < 0)  game.enemyProjectileArray.splice(i,1);}},
-            { "name" : "opponentArray", "collidesWith" : "playerArray", "removal" : function () {if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);}},
-            { "name" : "itemArray", "collidesWith" : "playerArray", "removal" : function () {if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);}}
-        ];
-        for (var k=0; k<=updateObjects.length-1; k++) {
-            if (typeof game[updateObjects[k].name][0] !== "undefined") {
-                for (var i=0; i<=game[updateObjects[k].name].length-1; i++) {
-                    game[updateObjects[k].name][i].update();
-                    game[updateObjects[k].name][i].detectCollision(i, updateObjects[k].collidesWith);       //TODO: make sure the collidesWidth parameters are working
+    "update" : function() {
+        for (var k=0; k<=game.objectArrays.length-1; k++) {
+            if (typeof game[game.objectArrays[k].name][0] !== "undefined") {
+                for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
+                    game[game.objectArrays[k].name][i].update();
+                    game[game.objectArrays[k].name][i].detectCollision(i, game.objectArrays[k].collidesWith); 
                 }
                 // Remove blasts from projectileArray when they fly off the screen
-                for (var i=0; i<=game[updateObjects[k].name].length-1; i++) {
-                    if (game[updateObjects[k].name][i].x > canvas.width)  game[updateObjects[k].name].splice(i,1);
+                for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
+                    game.objectArrays[k].removal(i);
                 }
             }
         }
     },
     "render" : function() {
-        var updateObjects = ['playerArray', 'playerProjectileArray', 'enemyProjectileArray', "opponentArray", "itemArray"];
-        for (var k=0; k<=updateObjects.length-1; k++) {
-            if (typeof game[updateObjects[k]][0] !== "undefined") {
-                for (var i=0; i<=game[updateObjects[k]].length-1; i++) {
-                    // TODO: move render functions into objects.
-                    game[updateObjects[k]][i].render(game[updateObjects[k]][i]);
+        for (var k=0; k<=game.objectArrays.length-1; k++) {
+            if (typeof game[game.objectArrays[k].name] !== "undefined") {
+                for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
+                    game[game.objectArrays[k].name][i].render(game[game.objectArrays[k].name][i]);
                 }
             }
         }
@@ -305,9 +305,11 @@ var sideScrollLevel = {
         this.mode = "normal";
         this.image = "spaceShipA";
         this.weapon = "dualLaser";
+        this.update = function () {};
         this.render = function (updateObject) {
             game.bufferCanvasCtx.drawImage(game['img'][updateObject.image], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
         };
+        this.detectCollision = function(thingA, thingB) {} // TODO: clean this up, christ
         this.getHit = function () {
             if (this.mode == "mega") {
                 this.mode = "normal";
