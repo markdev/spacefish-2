@@ -7,10 +7,6 @@
     </style>
     <script src="jquery-1.9.0.min.js"></script>
     <script src="myFunctions.js"></script>
-<!--<script src="spaceFishData.js"></script>
-    <script src="mark.js"></script>
-    <script src="spacefish.js"></script>        -->
-
 </head>
 <body>
 
@@ -26,10 +22,6 @@
             this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
             this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
             this.bufferCanvasCtx.canvas.height = this.ctx.canvas.height;
-
-            this.playerArray = [];
-            this.projectileArray = [];
-            this.opponentArray = [];
 
             this.intervals = [];
 
@@ -221,7 +213,8 @@
        var sideScrollLevel = {
             "initialize" : function() {
                 game.playerArray = [];
-                game.projectileArray = [];
+                game.playerProjectileArray = [];
+                game.enemyProjectileArray = [];
                 game.opponentArray = [];
                 game.itemArray = [];
                 game.playerArray[game.playerArray.length] = new sideScrollLevel.SpaceShip();
@@ -239,15 +232,26 @@
                 game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
             },
             "update" : function() {  // TODO: see if these functions can be refactored
-                // Projectiles
-                if (typeof game.projectileArray[0] !== "undefined") {
-                    for (var i=0; i<=game.projectileArray.length-1; i++) {
-                        game.projectileArray[i].update();
-                        game.projectileArray[i].detectCollision(i);
+                // Player Projectiles
+                if (typeof game.playerProjectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.playerProjectileArray.length-1; i++) {
+                        game.playerProjectileArray[i].update();
+                        game.playerProjectileArray[i].detectCollision(i, "opponentArray");
                     }
                     // Remove blasts from projectileArray when they fly off the screen
-                    for (var i=0; i<=game.projectileArray.length-1; i++) {
-                        if (game.projectileArray[i].x > canvas.width)  game.projectileArray.splice(i,1);
+                    for (var i=0; i<=game.playerProjectileArray.length-1; i++) {
+                        if (game.playerProjectileArray[i].x > canvas.width)  game.playerProjectileArray.splice(i,1);
+                    }
+                }
+                // Enemy Projectiles
+                if (typeof game.enemyProjectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.enemyProjectileArray.length-1; i++) {
+                        game.enemyProjectileArray[i].update();
+                        game.enemyProjectileArray[i].detectCollision(i, "playerArray");
+                    }
+                    // Remove blasts from projectileArray when they fly off the screen
+                    for (var i=0; i<=game.enemyProjectileArray.length-1; i++) {
+                        if (game.enemyProjectileArray[i].x < 0)  game.enemyProjectileArray.splice(i,1);
                     }
                 }
                 // Opponents
@@ -267,7 +271,7 @@
                         game.itemArray[i].update();
                         game.itemArray[i].detectCollision(i);
                     }
-                    // Remove opponents that have flown off the screen
+                    // Remove items that have flown off the screen
                     for (var i=0; i<=game.itemArray.length-1; i++) {
                         if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);
                     }
@@ -278,13 +282,22 @@
                 for (var i=0; i<game.playerArray.length; i++) {
                     game.bufferCanvasCtx.drawImage(game['img'][game.playerArray[i].image], game.playerArray[i].x, game.playerArray[i].y, game.playerArray[i].w, game.playerArray[i].h);
                 }
-                if (typeof game.projectileArray[0] !== "undefined") {
-                    for (var i=0; i<=game.projectileArray.length-1; i++) {
-                        game.bufferCanvasCtx.fillStyle = game.projectileArray[i].color;
+                if (typeof game.playerProjectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.playerProjectileArray.length-1; i++) {
+                        game.bufferCanvasCtx.fillStyle = game.playerProjectileArray[i].color;
                         game.bufferCanvasCtx.beginPath();
-                        game.bufferCanvasCtx.arc(game.projectileArray[i].x, game.projectileArray[i].y, game.projectileArray[i].radius, 0, 2 * Math.PI);
+                        game.bufferCanvasCtx.arc(game.playerProjectileArray[i].x, game.playerProjectileArray[i].y, game.playerProjectileArray[i].radius, 0, 2 * Math.PI);
                         game.bufferCanvasCtx.fill();
                     }
+                }
+                if (typeof game.enemyProjectileArray[0] !== "undefined") {
+                    for (var i=0; i<=game.enemyProjectileArray.length-1; i++) {
+                        game.bufferCanvasCtx.fillStyle = game.enemyProjectileArray[i].color;
+                        game.bufferCanvasCtx.beginPath();
+                        game.bufferCanvasCtx.arc(game.enemyProjectileArray[i].x, game.enemyProjectileArray[i].y, game.enemyProjectileArray[i].radius, 0, 2 * Math.PI);
+                        game.bufferCanvasCtx.fill();
+                    }
+                    console.log(game.enemyProjectileArray.length);
                 }
                 if (typeof game.opponentArray[0] !== "undefined") {
                     for (var i=0; i<=game.opponentArray.length-1; i++) {
@@ -371,20 +384,20 @@
                }
            },
 
-           "Blast" : function (velx, y, vely, radius, color, update) {
-               this.x = game.playerArray[0].w;
+           "Blast" : function (x, velx, y, vely, radius, color, update) {
+               this.x = x; //game.playerArray[0].w;
                this.velx = velx;
                this.y = y;
                this.vely = vely;
                this.radius = radius;
                this.color = color;
                this.update = update;
-               this.detectCollision = function(blastId) {
-                   for (var i=0; i<=game.opponentArray.length-1; i++) {
-                       if (this.x > game.opponentArray[i].x && this.x < game.opponentArray[i].x + game.opponentArray[i].w &&
-                           this.y > game.opponentArray[i].y && this.y < game.opponentArray[i].y + game.opponentArray[i].h) {
-                           game.opponentArray[i].getHit(i);
-                           game.projectileArray.splice(blastId,1);
+               this.detectCollision = function(blastId, targetArray) {
+                   for (var i=0; i<=game[targetArray].length-1; i++) {
+                       if (this.x > game[targetArray][i].x && this.x < game[targetArray][i].x + game[targetArray][i].w &&
+                           this.y > game[targetArray][i].y && this.y < game[targetArray][i].y + game[targetArray][i].h) {
+                           game[targetArray][i].getHit(i);
+                           game.playerProjectileArray.splice(blastId,1);
                        }
                    }
                };
@@ -452,9 +465,9 @@
                "Sam" : { "name" : "Sam", "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
                "Luciano" : { "name" : "Luciano", "w" : 200, "h" : 300, "velx" : 25, "img" : "sinusoidSwimmerA", "item" : "shockWave", "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}},
                "Homer" : { "name" : "Homer", "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "homingMissile", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
-               "Darren" : { "name" : "Darren", "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}}, // TODO: Fix Darren to activate dylan
+               "Darren" : { "name" : "Darren", "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
                "Dylan" : { "name" : "Dylan", "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "bouncyBalls", "update" : function() {this.x -= this.velx; this.y -= this.vely;}},
-               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;}},   // TODO: Fix Frank
+               "Frank" : { "name" : "Frank", "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;  if (this.x >700 && this.x < 720) {game.enemyProjectileArray[game.enemyProjectileArray.length] = new sideScrollLevel.Blast(this.x, -20, this.y + this.h/2, 0, 10, "orange", function () {this.x += this.velx})}}},
                "CrabCakes" : { "name" : "CrabCakes", "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {
                    this.x -= this.velx;
                    if (this.x < 0) this.velx = -this.velx;
@@ -474,22 +487,22 @@
                "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "action" : function () {game.playerArray[0].weapon = "hellFire";}}
            },
            "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
-               "peaShooter" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx})}},
-               "dualLaser" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
-                                                    game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});}},
-               "shockWave" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "yellow", function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;})}},
-               "homingMissile" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 20, "red", function () {
+               "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "white", function () {this.x += this.velx})}},
+               "dualLaser" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)-15, 1, 7, "red", function () {this.x += this.velx});
+                                                    game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, (game.playerArray[0].y + game.playerArray[0].h/2)+15, 1, 7, "red", function () {this.x += this.velx});}},
+               "shockWave" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, game.playerArray[0].y + game.playerArray[0].h/2, 1, 10, "yellow", function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;})}},
+               "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 5, game.playerArray[0].y + game.playerArray[0].h/2, 1, 20, "red", function () {
                    if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;}
                    this.x += this.velx;
                })}},
-               "bouncyBalls" : {"fire" : function() { game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(10, game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*2 - 1) * 10, 10, "purple", function () {
+               "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, 10, game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*2 - 1) * 10, 10, "purple", function () {
                    this.x += this.velx;
                    this.y += this.vely;
                    if (this.y < 0) this.vely = -this.vely;
                    if (this.y + this.radius > canvas.height) this.vely = -this.vely;
                    })
                }},
-               "hellFire" : {"fire" : function() {game.projectileArray[game.projectileArray.length] = new sideScrollLevel.Blast(Math.round(Math.random()*20 - 10), game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*20 - 10), 10, "red", function () {
+               "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast(game.playerArray[0].w, Math.round(Math.random()*20 - 10), game.playerArray[0].y + game.playerArray[0].h/2, Math.round(Math.random()*20 - 10), 10, "red", function () {
                    this.x += this.velx;
                    if (this.x < 0) this.velx = -this.velx;
                    if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx;
@@ -499,10 +512,8 @@
                })}}
            }
        }
-
         var game = new Game();
         game.loadImage();
     </script>
-
 </body>
 </html>
