@@ -270,28 +270,13 @@ var sideScrollLevel = {
             }
         }}
     ],
-    "hitPlayer" : function(opponentId) {
-        game.playerArray[0].getHit();
-        game.opponentArray.splice(opponentId, 1);
-    },
-    "killPlayer" : function() {
-        game.lives -= 1;
-        if (game.lives > 0) {
-            game.loadGameLoop("levelOne");
-        } else {
-            game.loadGameLoop("loseScreen");
-        }
-    },
-    "loadItem" : function(itemId) {
-        game.itemArray[itemId].action();
-        game.itemArray.splice(itemId,1);
-    },
 
     /*
      *    Game Object Prototypes        // TODO: Override basic member assignments with an object prototype
      *
      */
     "Player" : function () {
+        var self = this;
         this.x = 0;
         this.y = canvas.height/2;
         this.w = 120;
@@ -305,7 +290,7 @@ var sideScrollLevel = {
             game.bufferCanvasCtx.drawImage(game['img'][updateObject.image], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
         };
         this.detectCollision = function(thingA, thingB) {} // TODO: clean this up, christ
-        this.getHit = function () {
+        this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
             if (this.mode == "mega") {
                 this.mode = "normal";
                 this.h = 60;
@@ -316,10 +301,15 @@ var sideScrollLevel = {
                 // nothing happens!  //TODO: add effect?
             } else if (this.mode == "normal") {
                 this.health -= 1;
-                sideScrollLevel.killPlayer();
+                self.die();
             }
         };
-        this.megaMode = function () {
+        this.die = function () {
+            game.lives -= 1;
+            var levelToLoad = game.lives > 0 ? "levelOne" : "loseScreen";
+            game.loadGameLoop(levelToLoad);
+        };
+        this.megaMode = function () {   // TODO: create a new method adjustMode() where you pass in an object and it alters all the members
             this.mode = "mega";
             this.h = 80;
             this.w = 120;
@@ -332,7 +322,7 @@ var sideScrollLevel = {
             this.w = 145;
             this.health = 1;
             this.image = "spaceShipShieldA";
-        }
+        };
     },
 
     "Blast" : function (argData) {
@@ -384,7 +374,9 @@ var sideScrollLevel = {
                     game.playerArray[0].x < game.opponentArray[opponentId].x + game.opponentArray[opponentId].w &&
                     game.playerArray[0].y + game.playerArray[0].h > game.opponentArray[opponentId].y &&
                     game.playerArray[0].y < game.opponentArray[opponentId].y + game.opponentArray[opponentId].h) {
-                sideScrollLevel.hitPlayer(opponentId);
+                // Hit Player
+                game.playerArray[0].getHit();
+                game.opponentArray.splice(opponentId, 1);
             }
         };
         this.getHit = typeof argData.getHit !== 'undefined' ? argData.getHit : function(i) {
@@ -417,7 +409,9 @@ var sideScrollLevel = {
                     game.playerArray[0].x < game.itemArray[itemId].x + game.itemArray[itemId].w &&
                     game.playerArray[0].y + game.playerArray[0].h > game.itemArray[itemId].y &&
                     game.playerArray[0].y < game.itemArray[itemId].y + game.itemArray[itemId].h) {
-                sideScrollLevel.loadItem(itemId);
+                // Load the item into the player
+                game.itemArray[itemId].action();
+                game.itemArray.splice(itemId,1);
             }
         }
     },
