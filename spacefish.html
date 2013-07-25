@@ -33,17 +33,7 @@ var Game = function () {
     this.score = 0;
     this.lives = 3;
     this.img = {};
-    this.imgArray = [
-        "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA",
-        "crabCakesB", "darkBack", "homingFishA", "homingFishB", "orbbouncy",
-        "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock",
-        "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip",
-        "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield",
-        "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA",
-        "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB",
-        "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs",
-        "youLose", "youWin"
-    ];
+    this.imgArray = ["AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA", "crabCakesB", "darkBack", "homingFishA", "homingFishB", "orbbouncy", "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock", "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip", "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield", "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA", "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB", "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs", "youLose", "youWin"];
 };
 
 Game.prototype = {
@@ -71,7 +61,8 @@ Game.prototype = {
                         "type" : "sideScrollLevel",
                         "background" : "theSea",
                         "timer" : 20,
-                        "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
+               //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
+                        "opponents": ["Bill", "Frank"]
                     },
                     secondScreen : {
                         "type" : "basicSplashScreen",
@@ -292,11 +283,7 @@ var sideScrollLevel = {
         this.detectCollision = function(thingA, thingB) {} // TODO: clean this up, christ
         this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
             if (this.mode == "mega") {
-                this.mode = "normal";
-                this.h = 60;
-                this.w = 120;
-                this.health = 1;
-                this.image = "spaceShipA";
+                this.changeMode('normal');
             } else if (this.mode == "drill") {
                 // nothing happens!  //TODO: add effect?
             } else if (this.mode == "normal") {
@@ -309,20 +296,18 @@ var sideScrollLevel = {
             var levelToLoad = game.lives > 0 ? "levelOne" : "loseScreen";
             game.loadGameLoop(levelToLoad);
         };
-        this.megaMode = function () {   // TODO: create a new method adjustMode() where you pass in an object and it alters all the members
-            this.mode = "mega";
-            this.h = 80;
-            this.w = 120;
-            this.health = 2;
-            this.image = "spaceShipMegaA";
-        };
-        this.drillMode = function () {
-            this.mode = "drill";
-            this.h = 60;
-            this.w = 145;
-            this.health = 1;
-            this.image = "spaceShipShieldA";
-        };
+        this.changeMode = function(mode) {
+            var modes = {
+                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "health" : 1, "image" : "spaceShipA"},
+                "mega" : {"mode" : "mega", "h" : 80, "w" : 120, "health" : 2, "image" : "spaceShipMegaA"},
+                "drill" : {"mode" : "drill", "h" : 60, "w" : 145, "health" : 1, "image" : "spaceShipShieldA"}
+            };
+            for (var key in modes[mode]) {
+                if (modes[mode].hasOwnProperty(key)) {
+                    self[key] = modes[mode][key];
+                }
+            }
+        }
     },
 
     "Blast" : function (argData) {
@@ -435,12 +420,12 @@ var sideScrollLevel = {
         "CrabCakes" : { "name" : "CrabCakes", "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
-        "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].megaMode();}},
+        "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].changeMode('mega');}},
         "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "action" : function () {game.playerArray[0].weapon = "dualLaser";}},
         "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "action" : function () {game.playerArray[0].weapon = "shockWave";}},
         "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming", "action" : function () {game.playerArray[0].weapon = "homingMissile";}},
         "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy", "action" : function () {game.playerArray[0].weapon = "bouncyBalls";}},
-        "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].drillMode();}},
+        "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].changeMode('drill');}},
         "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "action" : function () {game.playerArray[0].weapon = "hellFire";}}
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
