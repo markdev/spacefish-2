@@ -235,7 +235,7 @@ var sideScrollLevel = {
                 for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
                     game[game.objectArrays[k].name][i].update();
                     game[game.objectArrays[k].name][i].detectRemoval();
-                    game[game.objectArrays[k].name][i].detectCollision(i, game.objectArrays[k].collidesWith);
+                    game[game.objectArrays[k].name][i].detectCollision(i, game.objectArrays[k].collidesWith); // TODO: set a loop around this
                 }
                 // Remove blasts from projectileArray when they fly off the screen
                 for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
@@ -329,6 +329,7 @@ var sideScrollLevel = {
     "Blast" : function (argData) {
         var self = this;
         this.init = sideScrollLevel.GameObjectInit(self, argData);
+        this.source = typeof argData.source !== "undefined" ? argData.source : "player";
         this.x = typeof argData.x !== "undefined" ? argData.x : game.playerArray[0].w;
         this.y = typeof argData.y !== "undefined" ? argData.y : game.playerArray[0].y + game.playerArray[0].h/2;
         this.radius = typeof argData.radius !== "undefined" ? argData.radius : 0;       // TODO: add radius?
@@ -345,11 +346,15 @@ var sideScrollLevel = {
             game.bufferCanvasCtx.fill();
         };
         this.detectCollision = typeof argData.detectCollision !== "undefined" ? argData.detectCollision : function(blastId, targetArray) {
-            for (var i=0; i<=game[targetArray].length-1; i++) {
+            for (var i=0; i<=game[targetArray].length-1; i++) {         // TODO: move this to sideScrollLevel.update();
                 if (this.x > game[targetArray][i].x && this.x < game[targetArray][i].x + game[targetArray][i].w &&
                         this.y > game[targetArray][i].y && this.y < game[targetArray][i].y + game[targetArray][i].h) {
                     game[targetArray][i].getHit(i);
-                    game.playerProjectileArray.splice(blastId,1);
+                    if (this.source == "player") {
+                        game.playerProjectileArray.splice(blastId,1);
+                    } else {
+                        game.enemyProjectileArray.splice(blastId,1);
+                    }
                 }
             }
         };
@@ -376,7 +381,7 @@ var sideScrollLevel = {
             }
         };
         this.detectCollision = function(opponentId) {
-            if (  game.playerArray[0].x + game.playerArray[0].w/2 > game.opponentArray[opponentId].x &&
+            if (    game.playerArray[0].x + game.playerArray[0].w > game.opponentArray[opponentId].x &&
                     game.playerArray[0].x < game.opponentArray[opponentId].x + game.opponentArray[opponentId].w &&
                     game.playerArray[0].y + game.playerArray[0].h > game.opponentArray[opponentId].y &&
                     game.playerArray[0].y < game.opponentArray[opponentId].y + game.opponentArray[opponentId].h) {
@@ -436,7 +441,7 @@ var sideScrollLevel = {
         }
             game.opponentArray.splice(i,1);}},
         "Dylan" : { "name" : "Dylan", "score" : 500, "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "bouncyBalls", "update" : function() {this.x -= this.velx; this.y -= this.vely;}},
-        "Frank" : { "name" : "Frank", "score" : 600,  "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;  if (this.x >700 && this.x < 720) {game.enemyProjectileArray[game.enemyProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Heroin", "x" : this.x, "y" : this.y + this.h/2, "velx" : -20, "vely" : 0, "update" : function () {this.x += this.velx}, "radius" : 10, "color" : "orange"})}}},
+        "Frank" : { "name" : "Frank", "score" : 600,  "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;  if (this.x >700 && this.x < 720) {game.enemyProjectileArray[game.enemyProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Heroin", "source" : "enemy", "x" : this.x, "y" : this.y + this.h/2, "velx" : -20, "vely" : 0, "update" : function () {this.x += this.velx}, "radius" : 10, "color" : "orange"})}}},
         "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
