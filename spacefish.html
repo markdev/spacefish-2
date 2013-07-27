@@ -39,10 +39,10 @@ var Game = function () {
 Game.prototype = {
     loadImage : function loadImage(i) {     // naming this function makes it accessible only for self-reference; it is not globally accessible
         i = (typeof i !== 'undefined') ? i : 0;
-        var image = new Image();
-        image.src = 'images/' + game.imgArray[i] + '.png';
-        image.onload = function(e) {
-            window['game']['img'][game.imgArray[i]] = image;
+        var img = new Image();
+        img.src = 'images/' + game.imgArray[i] + '.png';
+        img.onload = function(e) {
+            window['game']['img'][game.imgArray[i]] = img;
             i++;
             if (i < game.imgArray.length) {
                 loadImage(i);   // see, that was painless
@@ -244,6 +244,7 @@ var sideScrollLevel = {
                     }
                 }
             }
+            console.log(game[game.objectArrays[k].name].length);
         }
     },
     "render" : function() {
@@ -275,23 +276,26 @@ var sideScrollLevel = {
      *
      */
 
-    "GameObject" : { "terminate" : false, "x" : 0, "y" : 0, "w" : 30, "h" : 15, "update" : function () {console.log("from prototype")}, "detectRemoval" : function () {}, detectCollision : function () {} },
+    "GameObject" : { "terminate" : false, "name" : "", "x" : 0, "y" : 0, "velx" : 0, "vely" : 0, "w" : 30, "h" : 15,
+                     "update" : function () {this.x += this.velx; this.y += this.vely;},
+                     "detectRemoval" : function () {if (this.x < -(this.w) || this.x > canvas.width) {this.terminate = true;}},
+                     "render" : function (updateObject) { game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);},
+                     "detectCollision" : function () {}
+                    },
+
+    "GameObjectInit" : function (self, argData) {
+        for (var key in sideScrollLevel.GameObject) {if (!self.hasOwnProperty(key)) self[key] = sideScrollLevel.GameObject[key];}
+        for (var key in argData) {self[key] = argData[key];}
+    },
 
     "Player" : function (argData) {
         var self = this;
-        this.x = 0;
-        this.y = canvas.height/2;
-        this.w = 60;
-        this.h = 30;
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
         this.health = 1;
         this.mode = "normal";
-        this.image = "spaceShipA";
+        this.img = "spaceShipA";
         this.weapon = "peaShooter";
-        this.update = function () {console.log("from constructor")};
-        this.detectRemoval = function() {};
-        this.render = function (updateObject) {
-            game.bufferCanvasCtx.drawImage(game['img'][updateObject.image], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
-        };
+        this.update = function () {};
         this.detectCollision = function(thingA, thingB) {} // TODO: clean this up, christ
         this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
             if (this.mode == "mega") {
@@ -310,9 +314,9 @@ var sideScrollLevel = {
         };
         this.changeMode = function(mode) {
             var modes = {
-                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "health" : 1, "image" : "spaceShipA"},
-                "mega" : {"mode" : "mega", "h" : 80, "w" : 120, "health" : 2, "image" : "spaceShipMegaA"},
-                "drill" : {"mode" : "drill", "h" : 60, "w" : 145, "health" : 1, "image" : "spaceShipShieldA"}
+                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "health" : 1, "img" : "spaceShipA"},
+                "mega" : {"mode" : "mega", "h" : 80, "w" : 120, "health" : 2, "img" : "spaceShipMegaA"},
+                "drill" : {"mode" : "drill", "h" : 60, "w" : 145, "health" : 1, "img" : "spaceShipShieldA"}
             };
             for (var key in modes[mode]) {
                 if (modes[mode].hasOwnProperty(key)) {
@@ -320,32 +324,17 @@ var sideScrollLevel = {
                 }
             }
         };
-        this.init = (function () {
-            for (var key in sideScrollLevel.GameObject) {
-               if (!self.hasOwnProperty(key)) self[key] = sideScrollLevel.GameObject[key]; // sets a member to the constructor from GameObject if it doesn't already exist
-            }
-            for (var key in argData) {
-               self[key] = argData[key];
-            }
-        }());
     },
 
     "Blast" : function (argData) {
         var self = this;
-        this.terminate = false;
-        this.name = typeof argData.name !== "undefined" ? argData.name : "blast";
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
         this.x = typeof argData.x !== "undefined" ? argData.x : game.playerArray[0].w;
         this.y = typeof argData.y !== "undefined" ? argData.y : game.playerArray[0].y + game.playerArray[0].h/2;
-        this.velx = typeof argData.velx !== "undefined" ? argData.velx : 0;
-        this.vely = typeof argData.vely !== "undefined" ? argData.vely : 0;
-        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 0;
+        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 0;       // TODO: add radius?
         this.color = typeof argData.color !== "undefined" ? argData.color : "white";
-        this.update = typeof argData.update !== "undefined" ? argData.update : function () {
-            this.x += this.velx;
-            this.y += this.vely;
-        };
         this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {
-            if (this.x > canvas.width || this.x < 0) {
+            if (this.x > canvas.width || this.x < this.radius) {
                 this.terminate = true;
             }
         };
@@ -368,40 +357,23 @@ var sideScrollLevel = {
 
     "Effect" : function(argData) {
         var self = this;
-        this.terminate = false;
-        this.x = typeof argData.x !== "undefined" ? argData.x: 0;
-        this.y = typeof argData.y !== "undefined" ? argData.y: 0;
-        this.sx = typeof argData.sx !== "undefined" ? argData.sx: 0;
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
+        this.sx = typeof argData.sx !== "undefined" ? argData.sx: 0;    // TODO: do I even need to declare any of these defaults?
         this.sy = typeof argData.sy !== "undefined" ? argData.sy: 0;
-        this.image = typeof argData.image !== "undefined" ? argData.image: "";
         this.opacity = typeof argData.opacity !== "undefined" ? argData.opacity: 0;
         this.text = typeof argData.text !== "undefined" ? argData.text : "";
-        this.update = typeof argData.update !== "undefined" ? argData.update : function () {};
-        this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {};
-        this.render = typeof argData.render !== "undefined" ? argData.render : function () {};
-        this.detectCollision = typeof argData.detectCollision !== "undefined" ? argData.detectCollision : function () {};
     },
 
     "Opponent" : function (argData) {   // TODO: add items to opponent directly
         var self = this;
-        this.terminate = false;
-        this.name = argData.name;
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
         this.score = typeof argData.score !== 'undefined' ? argData.score : 0;
-        this.w = typeof argData.w !== 'undefined' ? argData.w : 100;
-        this.h = typeof argData.h !== 'undefined' ? argData.h : 100;
         this.x = typeof argData.x !== 'undefined' ? argData.x : canvas.width;
         this.y = typeof argData.y !== 'undefined' ? argData.y : Math.random() * (canvas.height - this.h);
-        this.velx = typeof velx !== 'undefined' ? velx : argData.velx;
-        this.vely = typeof vely !== 'undefined' ? vely : argData.vely;
-        this.img = argData.img;
-        this.update = typeof argData.update !== "undefined" ? argData.update : function () {};
         this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {
             if (this.x < -(this.w)) {
                 this.terminate = true;
             }
-        };
-        this.render = typeof argData.render !== "undefined" ? argData.render : function (updateObject) {
-            game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
         };
         this.detectCollision = function(opponentId) {
             if (  game.playerArray[0].x + game.playerArray[0].w/2 > game.opponentArray[opponentId].x &&
@@ -427,31 +399,16 @@ var sideScrollLevel = {
         };
         this.explode = function () {
             // Draw the explosion // TODO: create functions for explosions that pass in the object being blown up as a parameter.
-            game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({"x" : self.x, "y" : self.y, "image" : "explosionSprite", "update" : function() {this.sx += 100; if (this.sx >= 600) {this.sx = 0; this.sy += 100;} if (this.sy > 600) {this.terminate = true;}}, "render" : function() {game.bufferCanvasCtx.drawImage(game['img'][this.image], this.sx, this.sy, 100, 100, this.x, this.y, 200, 200)}});
+            game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({"x" : self.x, "y" : self.y, "img" : "explosionSprite", "update" : function() {this.sx += 100; if (this.sx >= 600) {this.sx = 0; this.sy += 100;} if (this.sy > 600) {this.terminate = true;}}, "render" : function() {game.bufferCanvasCtx.drawImage(game['img'][this.img], this.sx, this.sy, 100, 100, this.x, this.y, 200, 200)}});
         };
     },
 
     "Item" : function(argData) {  // TODO: make this dynamic so that it is called by the opponent
         var self = this;
-        this.terminate = false;
-        this.name = argData.name;
-        this.x = argData.x;
-        this.y = argData.y;
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
         this.w = 40; // TODO: change this to a radius maybe
         this.h = 40;
-        this.img = argData.img;
-        this.update = function () {
-            this.x -= 4;
-        };
-        this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {
-            if (this.x < -(this.w)) {
-                this.terminate = true;
-            }
-        };
-        this.action = argData.action;
-        this.render = function (updateObject) {
-            game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
-        };
+        this.velx = -4;
         this.detectCollision = function(itemId) {
             if ( game.playerArray[0].x + game.playerArray[0].w/2 > game.itemArray[itemId].x &&
                     game.playerArray[0].x < game.itemArray[itemId].x + game.itemArray[itemId].w &&
