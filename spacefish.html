@@ -62,7 +62,7 @@ Game.prototype = {
                         "background" : "theSea",
                         "timer" : 20,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Frank"]
+                        "opponents": ["Frank", "Bill"]
                     },
                     secondScreen : {
                         "type" : "basicSplashScreen",
@@ -140,7 +140,7 @@ Game.prototype = {
         for (var key in spaceFishData[gameScreen]) {
             this.gameLoop[key] = spaceFishData[gameScreen][key];
         }
-        extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
+        extend(this.gameLoop, window[spaceFishData[gameScreen].type]); // extend an invoked function with an object
 
         // clear all the existing intervals
         if (typeof game.intervals[0] !== 'undefined') {
@@ -209,15 +209,18 @@ var sideScrollLevel = {
         game.itemArray = [];
         game.effectArray = [];
         game.objectArrays = [
-            { "name" : "playerArray", "collidesWith" : "opponentArray", "removal" : function (i) {}},
-            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "removal" : function (i) {if (game.playerProjectileArray[i].x > canvas.width)  game.playerProjectileArray.splice(i,1);}},
-            { "name" : "enemyProjectileArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.enemyProjectileArray[i].x < 0)  game.enemyProjectileArray.splice(i,1);}},
-            { "name" : "opponentArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.opponentArray[i].x < -(game.opponentArray[i].w)) game.opponentArray.splice(i,1);}},
-            { "name" : "itemArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.itemArray[i].x < -(game.itemArray[i].w)) game.itemArray.splice(i,1);}},
-            { "name" : "effectArray", "collidesWith" : "playerArray", "removal" : function (i) {if (game.effectArray[i].terminate == true) {game.effectArray.splice(i,1)}}}
+            { "name" : "playerArray", "collidesWith" : "opponentArray"},
+            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray"},
+            { "name" : "enemyProjectileArray", "collidesWith" : "playerArray"},
+            { "name" : "opponentArray", "collidesWith" : "playerArray"},
+            { "name" : "itemArray", "collidesWith" : "playerArray"},
+            { "name" : "effectArray", "collidesWith" : "playerArray"}
         ];
 
-        game.playerArray[game.playerArray.length] = new sideScrollLevel.Player();
+        game.playerArray[game.playerArray.length] = new sideScrollLevel.Player({ x : 0, y : canvas.height/2, w : 120, h : 60, "foo" : "sheezy" });
+
+     //   extend(game.playerArray[0], sideScrollLevel.GameObject); // TODO: get rid of this
+
         game.intervals[game.intervals.length] = setInterval(function() {    // Generate opponents at random
             game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)]]);
         }, 1000);
@@ -236,7 +239,6 @@ var sideScrollLevel = {
                 }
                 // Remove blasts from projectileArray when they fly off the screen
                 for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
-                    //game.objectArrays[k].removal(i);
                     if (game[game.objectArrays[k].name][i].terminate == true) {
                         game[game.objectArrays[k].name].splice(i,1);
                     }
@@ -272,17 +274,20 @@ var sideScrollLevel = {
      *    Game Object Prototypes        // TODO: Override basic member assignments with an object prototype
      *
      */
-    "Player" : function () {
+
+    "GameObject" : { "terminate" : false, "x" : 0, "y" : 0, "w" : 30, "h" : 15, "update" : function () {console.log("from prototype")}, "detectRemoval" : function () {}, detectCollision : function () {} },
+
+    "Player" : function (argData) {
         var self = this;
         this.x = 0;
         this.y = canvas.height/2;
-        this.w = 120;
-        this.h = 60;
+        this.w = 60;
+        this.h = 30;
         this.health = 1;
         this.mode = "normal";
         this.image = "spaceShipA";
         this.weapon = "peaShooter";
-        this.update = function () {};
+        this.update = function () {console.log("from constructor")};
         this.detectRemoval = function() {};
         this.render = function (updateObject) {
             game.bufferCanvasCtx.drawImage(game['img'][updateObject.image], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
@@ -314,7 +319,15 @@ var sideScrollLevel = {
                     self[key] = modes[mode][key];
                 }
             }
-        }
+        };
+        this.init = (function () {
+            for (var key in sideScrollLevel.GameObject) {
+               if (!self.hasOwnProperty(key)) self[key] = sideScrollLevel.GameObject[key]; // sets a member to the constructor from GameObject if it doesn't already exist
+            }
+            for (var key in argData) {
+               self[key] = argData[key];
+            }
+        }());
     },
 
     "Blast" : function (argData) {
@@ -487,6 +500,7 @@ var sideScrollLevel = {
         "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "radius" : 10, "color" : "red"})}}
     }
 }
+
     var game = new Game();
     game.loadImage();
 </script>
