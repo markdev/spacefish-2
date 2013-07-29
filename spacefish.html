@@ -64,6 +64,13 @@ Game.prototype = {
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
                         "opponents": ["Frank", "Bill"]
                     },
+                    levelTwo : {
+                        "type" : "sideScrollLevel",
+                        "background" : "theSea",
+                        "timer" : 20,
+                        //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
+                        "opponents": ["Sam", "Darren"]
+                    },
                     secondScreen : {
                         "type" : "basicSplashScreen",
                         "background" : "youWin",
@@ -140,7 +147,8 @@ Game.prototype = {
         for (var key in spaceFishData[gameScreen]) {
             this.gameLoop[key] = spaceFishData[gameScreen][key];
         }
-        extend(this.gameLoop, window[spaceFishData[gameScreen].type]); // extend an invoked function with an object
+        // extend an invoked function with an object
+        extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
 
         // clear all the existing intervals
         if (typeof game.intervals[0] !== 'undefined') {
@@ -208,17 +216,39 @@ var sideScrollLevel = {
         game.opponentArray = [];
         game.itemArray = [];
         game.effectArray = [];
+        game.displayArray = [];
         game.objectArrays = [
             { "name" : "playerArray", "collidesWith" : "opponentArray", "action" : function(a, b, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { a.getHit(); game.opponentArray.splice(j,1);}}},
             { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "action" : function (a, b, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(); game.playerProjectileArray.splice(j,1);}}},
             { "name" : "opponentProjectileArray", "collidesWith" : "playerArray", "action" : function (a, b, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit();  game.opponentProjectileArray.splice(j,1);}}},
             { "name" : "opponentArray"},
             { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) {game.itemArray[j].action(); game.itemArray.splice(j,1);}}},
-            { "name" : "effectArray"}
+            { "name" : "effectArray"},
+            { "name" : "displayArray"}
         ];
 
+        game.startTime = +new Date();
+        game.elapsedTime = undefined;
+        game.levelTime = 9000;
+
+        // Create the player
         game.playerArray[game.playerArray.length] = new sideScrollLevel.Player({ x : 0, y : canvas.height/2, w : 120, h : 60 });
 
+        // Create the main display
+        game.displayArray[game.displayArray.length] = new sideScrollLevel.Display({"level" : game.currentLevel, "score" : game.score, "time" : 30, "lives" : game.lives,
+            "update" : function() {},
+            "render" : function() {
+                game.bufferCanvasCtx.font = "20pt Arial";
+                game.bufferCanvasCtx.fillStyle = "white";
+                var ymargin = 30;
+                game.bufferCanvasCtx.fillText("Level: " + game.currentLevel, 20, ymargin);
+                game.bufferCanvasCtx.fillText("Score: " + game.score, 300, ymargin);
+                game.bufferCanvasCtx.fillText("Time: " + game.currentTime.substr(0,2), 500, ymargin);
+                game.bufferCanvasCtx.fillText("Lives: " + game.lives, 800, ymargin);
+            }
+        });
+
+        // Generate Opponents
         game.intervals[game.intervals.length] = setInterval(function() {    // Generate opponents at random
             game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)]]);
         }, 1000);
@@ -228,12 +258,21 @@ var sideScrollLevel = {
         game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
     },
     "update" : function() {
+        // update game time
+        game.currentTime = String(game.levelTime - (+new Date() - game.startTime));
+        while (game.currentTime.length !== 5) {
+            var zero = "0";
+            game.currentTime = zero.concat(game.currentTime);
+        }
+        if (Number(game.currentTime) < 0) game.loadGameLoop("levelTwo");
+
+        // update object arrays
         for (var k=0; k<=game.objectArrays.length-1; k++) {
             if (typeof game[game.objectArrays[k].name][0] !== "undefined") {
                 for (var i=0; i<=game[game.objectArrays[k].name].length-1; i++) {
                     game[game.objectArrays[k].name][i].update();
 
-                    // detectRemoval will switch the terminate value to true, which wipes it out below.
+                    // DetectRemoval will switch the terminate value to true, which wipes it out below.
                     game[game.objectArrays[k].name][i].detectRemoval();
 
                     // Collision detection
@@ -280,7 +319,7 @@ var sideScrollLevel = {
     ],
 
     /*
-     *    Game Object Prototypes        // TODO: Override basic member assignments with an object prototype
+     *    Game Object Prototypes
      *
      */
 
@@ -365,6 +404,12 @@ var sideScrollLevel = {
         this.text = typeof argData.text !== "undefined" ? argData.text : "";
     },
 
+    "Display" : function(argData) {
+        var self = this;
+        this.init = sideScrollLevel.GameObjectInit(self, argData);
+        this.text = typeof argData.text !== "undefined" ? argData.text : "";
+    },
+
     "Opponent" : function (argData) {   // TODO: add items to opponent directly
         var self = this;
         this.init = sideScrollLevel.GameObjectInit(self, argData);
@@ -382,6 +427,8 @@ var sideScrollLevel = {
             argData.x = self.x;
             argData.y = self.y + self.h/2;
             // Draw the score
+            game.score += self.score;
+//console.log(game.score);
             game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({"x" : self.x + self.w/2, "y" : self.y, "opacity" : 1, "text" : self.score, "update" : function() {this.y -= 2; this.opacity -= .02; if (this.opacity <= 0) {this.terminate = true;}}, "render" : function() {game.bufferCanvasCtx.font = "20pt Arial"; game.bufferCanvasCtx.fillStyle = "rgba(255,255,255," + this.opacity + ")"; game.bufferCanvasCtx.fillText(this.text, this.x, this.y);}});
             self.explode();
             game.itemArray[game.itemArray.length] = new sideScrollLevel.Item(argData);
