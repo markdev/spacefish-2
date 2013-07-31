@@ -217,6 +217,10 @@ var basicSplashScreen = {
 
 var sideScrollLevel = {
     "initialize" : function() {
+        game.startTime = +new Date();
+        game.elapsedTime = undefined;
+        game.levelTime = window.spaceFishData[game.currentLevel].timer * 1000;
+
         game.playerArray = [];
         game.playerProjectileArray = [];
         game.opponentProjectileArray = [];
@@ -225,18 +229,14 @@ var sideScrollLevel = {
         game.effectArray = [];
         game.displayArray = [];
         game.objectArrays = [
-            { "name" : "playerArray", "collidesWith" : "opponentArray", "action" : function(a, b, j, i) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { a.getHit(i); game.opponentArray.splice(j,1);}}},
-            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "action" : function (a, b, j, i) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j); game.playerProjectileArray.splice(i,1);}}},
-            { "name" : "opponentProjectileArray", "collidesWith" : "playerArray", "action" : function (a, b, j, i) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j);  game.opponentProjectileArray.splice(i,1);}}},
+            { "name" : "playerArray", "collidesWith" : "opponentArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { a.getHit(i); game.opponentArray.splice(j,1);}}},
+            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j); game.playerProjectileArray.splice(i,1);}}},
+            { "name" : "opponentProjectileArray", "collidesWith" : "playerArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j);  game.opponentProjectileArray.splice(i,1);}}},
             { "name" : "opponentArray"},
-            { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, j, i) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) {game.itemArray[i].action(); game.itemArray.splice(i,1);}}},
+            { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) {game.itemArray[i].action(); game.itemArray.splice(i,1);}}},
             { "name" : "effectArray"},
             { "name" : "displayArray"}
         ];
-
-        game.startTime = +new Date();
-        game.elapsedTime = undefined;
-        game.levelTime = window.spaceFishData[game.currentLevel].timer * 1000;
 
         // Create the player
         game.playerArray[game.playerArray.length] = new sideScrollLevel.Player({ x : 0, y : canvas.height/2, w : 120, h : 60 });
@@ -287,7 +287,7 @@ var sideScrollLevel = {
                     if (typeof game.objectArrays[k].collidesWith !== "undefined") {
                         for (var j=0; j<=game[game.objectArrays[k].collidesWith].length-1; j++) {
                             var b = game[game.objectArrays[k].collidesWith][j];
-                            game.objectArrays[k].action(a, b, j, i);
+                            game.objectArrays[k].action(a, b, i, j);
                         }
                     }
                 }
@@ -464,7 +464,6 @@ var sideScrollLevel = {
         "Sam" : { "name" : "Sam", "score" : 200, "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
         "Luciano" : { "name" : "Luciano", "score" : 300, "w" : 200, "h" : 300, "velx" : 25, "img" : "sinusoidSwimmerA", "item" : "shockWave", "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}},
         "Homer" : { "name" : "Homer", "score" : 400, "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "homingMissile", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
-        // TODO: fix Darren
         "Darren" : { "name" : "Darren", "score" : 500, "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}, "getHit" : function(i) {
             game.opponentArray[i].explode(); for (var k=-5; k<=5; k+=5) {
             var dylanData = sideScrollLevel['OpponentData']['Dylan']; dylanData.x = game.opponentArray[i].x; dylanData.y = game.opponentArray[i].y; dylanData.vely = k;
