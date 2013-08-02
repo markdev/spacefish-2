@@ -67,7 +67,7 @@ Game.prototype = {
                     },
                     levelTwo : {
                         "type" : "sideScrollLevel",
-                        "background" : "theSea",
+                        "background" : "planetview",
                         "timer" : 20,
                         //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
                         "opponents": ["Sam", "Darren"],
@@ -221,6 +221,8 @@ var sideScrollLevel = {
         game.elapsedTime = undefined;
         game.levelTime = window.spaceFishData[game.currentLevel].timer * 1000;
 
+        game.levelShift = 0; // TODO: fix this gayness
+
         game.playerArray = [];
         game.playerProjectileArray = [];
         game.opponentProjectileArray = [];
@@ -264,8 +266,13 @@ var sideScrollLevel = {
     "clearScreen" : function() {
         game.bufferCanvasCtx.fillStyle = "black";
         game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
+
+        game.bufferCanvasCtx.drawImage(game['img'][window.spaceFishData[game.currentLevel].background], game.levelShift, 0);
     },
     "update" : function() {
+        // shift background
+        game.levelShift -= .2;
+
         // update game time
         game.currentTime = String(game.levelTime - (+new Date() - game.startTime));
         while (game.currentTime.length !== 5) {
