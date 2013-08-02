@@ -62,7 +62,7 @@ Game.prototype = {
                         "background" : "theSea",
                         "timer" : 20,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Darren"],
+                        "opponents": ["Bill", "Frank", "Sam", "Luciano"],
                         "win" : "levelTwo"
                     },
                     levelTwo : {
@@ -311,19 +311,28 @@ var sideScrollLevel = {
             }
         }
 
+        var modeHeight = 0;
         if (game.playerArray[0].weapon.name  !== "peaShooter") {
-  /*          game.bufferCanvasCtx.font = "20pt Arial";
-            game.bufferCanvasCtx.fillStyle = "white";       */
-            game.bufferCanvasCtx.fillText(String(((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2)), 100, 100);
-
             game.bufferCanvasCtx.fillStyle = game.playerArray[0].weapon.color;
-            var startX = (game.bufferCanvas.width/2) - ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2);
-            var endX = ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2) * 2;
+            var startX = (game.bufferCanvas.width/2) - ((game.playerArray[0].weapon.endTime - game.playerArray[0].weapon.currentTime) / (game.playerArray[0].weapon.endTime - game.playerArray[0].weapon.startTime)) * (game.bufferCanvas.width/2);
+            var endX = ((game.playerArray[0].weapon.endTime - game.playerArray[0].weapon.currentTime) / (game.playerArray[0].weapon.endTime - game.playerArray[0].weapon.startTime)) * (game.bufferCanvas.width/2) * 2;
             game.bufferCanvasCtx.fillRect(startX, game.bufferCanvas.height-50, endX, 50);
 
             game.bufferCanvasCtx.font = "20pt Arial";
             game.bufferCanvasCtx.fillStyle = "white";
             game.bufferCanvasCtx.fillText(game.playerArray[0].weapon.title, game.bufferCanvas.width/2 - 50, game.bufferCanvas.height - 15);
+            modeHeight += 50;
+        }
+
+        if (game.playerArray[0].mode.name  !== "normal") {
+            game.bufferCanvasCtx.fillStyle = game.playerArray[0].mode.color;
+            var startX = (game.bufferCanvas.width/2) - ((game.playerArray[0].mode.endTime - game.playerArray[0].mode.currentTime) / (game.playerArray[0].mode.endTime - game.playerArray[0].mode.startTime)) * (game.bufferCanvas.width/2);
+            var endX = ((game.playerArray[0].mode.endTime - game.playerArray[0].mode.currentTime) / (game.playerArray[0].mode.endTime - game.playerArray[0].mode.startTime)) * (game.bufferCanvas.width/2) * 2;
+            game.bufferCanvasCtx.fillRect(startX, game.bufferCanvas.height-(50+modeHeight), endX, 50);
+
+            game.bufferCanvasCtx.font = "20pt Arial";
+            game.bufferCanvasCtx.fillStyle = "white";
+            game.bufferCanvasCtx.fillText(game.playerArray[0].mode.title, game.bufferCanvas.width/2 - 50, game.bufferCanvas.height - (15+modeHeight));
         }
     },
     "events" : [
@@ -346,7 +355,6 @@ var sideScrollLevel = {
                      "update" : function () {this.x += this.velx; this.y += this.vely;},
                      "detectRemoval" : function () {if (this.x < -(this.w) || this.x > canvas.width) {this.terminate = true;}},
                      "render" : function (updateObject) {
-                         console.log(typeof updateObject);
                          game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);}
                     },
 
@@ -362,29 +370,40 @@ var sideScrollLevel = {
         this.name = "player";
 
         this.health = 1;
-        this.mode = "normal";
         this.img = "spaceShipA";
-        this.weapon = {
+        this.weapon = { // TODO change title parameter in data file (name) to title
             "name" : "peaShooter",
             "color" : "white",
-            "title" : "Pea Shooter"
+            "title" : "Pea Shooter",
+            "startTime" : 0,
+            "endTime" : 0,
+            "currentTime" : 0
         };
-        this.weaponStartTime = 0;
-        this.weaponEndTime = 0;
-        this.weaponCurrentTime = 0;
+        this.mode = {
+            "name" : "normal",
+            "color" : "white",
+            "title" : "Normal",
+            "startTime" : 0,
+            "endTime" : 0,
+            "currentTime" : 0
+        };
         this.update = function () {
             if (this.weapon.name !== "peaShooter") {
-                this.weaponCurrentTime = +new Date();
-                if (this.weaponCurrentTime > this.weaponEndTime) this.changeWeapon("peaShooter");
+                this.weapon.currentTime = +new Date();
+                if (this.weapon.currentTime > this.weapon.endTime) this.changeWeapon("peaShooter");
+            }
+            if (this.mode.name !== "normal") {
+                this.mode.currentTime = +new Date();
+                if (this.mode.currentTime > this.mode.endTime) this.changeMode("normal");
             }
         };
         this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
-            if (this.mode == "mega") {
-                this.changeMode('normal');
-            } else if (this.mode == "drill") {
+            if (self.mode.name == "mega") {
+                self.changeMode('normal');
+            } else if (self.mode.name == "drill") {
                 // nothing happens!  //TODO: add effect?
-            } else if (this.mode == "normal") {
-                this.health -= 1;
+            } else if (self.mode.name == "normal") {
+                self.health -= 1;
                 self.die();
             }
         };
@@ -395,21 +414,31 @@ var sideScrollLevel = {
         };
         this.changeWeapon = function(weapon, duration, color, title) {
             this.weapon.name = weapon;
-            this.weaponStartTime = +new Date();
-            this.weaponEndTime = this.weaponStartTime + (duration * 1000);
+            this.weapon.startTime = +new Date();
+            this.weapon.endTime = this.weapon.startTime + (duration * 1000);
             this.weapon.color = color;
             this.weapon.title = title;
         };
         this.changeMode = function(mode) {
             var modes = {
-                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "health" : 1, "img" : "spaceShipA"},
-                "mega" : {"mode" : "mega", "h" : 80, "w" : 120, "health" : 2, "img" : "spaceShipMegaA"},
-                "drill" : {"mode" : "drill", "h" : 60, "w" : 145, "health" : 1, "img" : "spaceShipShieldA"}
+                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "color" : "white", "health" : 1, "img" : "spaceShipA"},
+                "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 2, "health" : 2, "img" : "spaceShipMegaA"},
+                "drill" : {"mode" : "drill", "h" : 60, "w" : 145,  "color" : "orange", "duration" : 2, "health" : 1, "img" : "spaceShipShieldA"}
             };
             for (var key in modes[mode]) {
                 if (modes[mode].hasOwnProperty(key)) {
-                    self[key] = modes[mode][key];
+                    if (key === "mode") {
+                        self.mode.name = modes[mode][key];      // TODO: make polymorphic?  Maybe?
+                    } else {
+                        self[key] = modes[mode][key];
+                    }
                 }
+            }
+            if (mode !== "normal") {
+                self.mode.startTime = +new Date();
+                self.mode.endTime = self.mode.startTime + (modes[mode].duration * 1000);
+                self.mode.color = modes[mode].color;
+                self.mode.title = mode;
             }
         };
     },
@@ -512,7 +541,7 @@ var sideScrollLevel = {
         "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "color" : "yellow", "duration" : 3, "action" : function () {game.playerArray[0].changeWeapon("shockWave", this.duration, this.color, this.name);}},
         "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming",  "color" : "red", "duration" : 4, "action" : function () {game.playerArray[0].changeWeapon("homingMissile", this.duration, this.color, this.name);}},
         "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy",  "color" : "blue", "duration" : 5, "action" : function () {game.playerArray[0].changeWeapon("bouncyBalls", this.duration, this.color, this.name);}},
-        "drill" : {"name" : "Drill", "img" : "orbdrill", "color" : "orange", "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill');}},
+        "drill" : {"name" : "Drill", "img" : "orbdrill", "color" : "orange", "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill', this.duration, this.color, this.name);}},
         "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "color" : "black", "duration" : 7, "action" : function () {game.playerArray[0].changeWeapon("hellFire", this.duration, this.color, this.name);}}
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
