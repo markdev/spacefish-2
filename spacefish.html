@@ -186,7 +186,7 @@ var GameLoop = function(level) {
         self.render();
         self.drawbuffer();
         if (self.cancelAnimationFrame == false) {
-            requestAnimationFrame(self.animate);
+            requestAnimationFrame(self.animate);    // TODO: accommodate mozRequestAnimationFrame, etc
         }
     };
 }
