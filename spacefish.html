@@ -62,7 +62,7 @@ Game.prototype = {
                         "background" : "theSea",
                         "timer" : 20,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["CrabCakes", "Sam"],
+                        "opponents": ["Darren"],
                         "win" : "levelTwo"
                     },
                     levelTwo : {
@@ -311,20 +311,24 @@ var sideScrollLevel = {
             }
         }
 
-        if (game.playerArray[0].weapon !== "peaShooter") {
-            game.bufferCanvasCtx.font = "20pt Arial";
-            game.bufferCanvasCtx.fillStyle = "white";
+        if (game.playerArray[0].weapon.name  !== "peaShooter") {
+  /*          game.bufferCanvasCtx.font = "20pt Arial";
+            game.bufferCanvasCtx.fillStyle = "white";       */
             game.bufferCanvasCtx.fillText(String(((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2)), 100, 100);
 
-            game.bufferCanvasCtx.fillStyle = "red";
+            game.bufferCanvasCtx.fillStyle = game.playerArray[0].weapon.color;
             var startX = (game.bufferCanvas.width/2) - ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2);
             var endX = ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2) * 2;
-            game.bufferCanvasCtx.fillRect(startX, game.bufferCanvas.height-50, endX * 2, 50);
+            game.bufferCanvasCtx.fillRect(startX, game.bufferCanvas.height-50, endX, 50);
+
+            game.bufferCanvasCtx.font = "20pt Arial";
+            game.bufferCanvasCtx.fillStyle = "white";
+            game.bufferCanvasCtx.fillText(game.playerArray[0].weapon.title, game.bufferCanvas.width/2 - 50, game.bufferCanvas.height - 15);
         }
     },
     "events" : [
         {"event" : "mousedown", "action" : function() {
-            sideScrollLevel['WeaponData'][game.playerArray[0].weapon]["fire"]();
+            sideScrollLevel['WeaponData'][game.playerArray[0].weapon.name]["fire"]();
         }},
         {"event" : "mousemove", "action" : function(e) {
             if (typeof game.playerArray[0] !== "undefined") {
@@ -341,7 +345,9 @@ var sideScrollLevel = {
     "GameObject" : { "terminate" : false, "name" : "", "x" : 0, "y" : 0, "velx" : 0, "vely" : 0, "w" : 30, "h" : 15,
                      "update" : function () {this.x += this.velx; this.y += this.vely;},
                      "detectRemoval" : function () {if (this.x < -(this.w) || this.x > canvas.width) {this.terminate = true;}},
-                     "render" : function (updateObject) { game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);}
+                     "render" : function (updateObject) {
+                         console.log(typeof updateObject);
+                         game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);}
                     },
 
     "GameObjectInit" : function (self, argData) {
@@ -358,12 +364,16 @@ var sideScrollLevel = {
         this.health = 1;
         this.mode = "normal";
         this.img = "spaceShipA";
-        this.weapon = "peaShooter";
+        this.weapon = {
+            "name" : "peaShooter",
+            "color" : "white",
+            "title" : "Pea Shooter"
+        };
         this.weaponStartTime = 0;
         this.weaponEndTime = 0;
         this.weaponCurrentTime = 0;
         this.update = function () {
-            if (this.weapon !== "peaShooter") {
+            if (this.weapon.name !== "peaShooter") {
                 this.weaponCurrentTime = +new Date();
                 if (this.weaponCurrentTime > this.weaponEndTime) this.changeWeapon("peaShooter");
             }
@@ -383,10 +393,12 @@ var sideScrollLevel = {
             var levelToLoad = game.lives > 0 ? "levelOne" : "loseScreen";
             game.loadGameLoop(levelToLoad);
         };
-        this.changeWeapon = function(weapon, duration) {
-            this.weapon = weapon;
+        this.changeWeapon = function(weapon, duration, color, title) {
+            this.weapon.name = weapon;
             this.weaponStartTime = +new Date();
             this.weaponEndTime = this.weaponStartTime + (duration * 1000);
+            this.weapon.color = color;
+            this.weapon.title = title;
         };
         this.changeMode = function(mode) {
             var modes = {
@@ -459,7 +471,6 @@ var sideScrollLevel = {
             game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({"x" : self.x + self.w/2, "y" : self.y, "opacity" : 1, "text" : self.score, "update" : function() {this.y -= 2; this.opacity -= .02; if (this.opacity <= 0) {this.terminate = true;}}, "render" : function() {game.bufferCanvasCtx.font = "20pt Arial"; game.bufferCanvasCtx.fillStyle = "rgba(255,255,255," + this.opacity + ")"; game.bufferCanvasCtx.fillText(this.text, this.x, this.y);}});
             self.explode();
             game.itemArray[game.itemArray.length] = new sideScrollLevel.Item(argData);
-       //     console.log(i);
             game.opponentArray.splice(i,1);
         };
         this.explode = function () {
@@ -496,13 +507,13 @@ var sideScrollLevel = {
         "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
-        "mega" : {"name" : "Mega", "img" : "orbmega", "duration" : 1, "action" : function () {game.playerArray[0].changeMode('mega', this.duration);}},
-        "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "duration" : 2, "action" : function () {game.playerArray[0].changeWeapon("dualLaser", this.duration);}},
-        "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "duration" : 3, "action" : function () {game.playerArray[0].changeWeapon("shockWave", this.duration);}},
-        "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming",  "duration" : 4, "action" : function () {game.playerArray[0].changeWeapon("homingMissile", this.duration);}},
-        "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy",  "duration" : 5, "action" : function () {game.playerArray[0].changeWeapon("bouncyBalls", this.duration);}},
-        "drill" : {"name" : "Drill", "img" : "orbdrill",  "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill');}},
-        "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire",  "duration" : 7, "action" : function () {game.playerArray[0].changeWeapon("hellFire", this.duration);}}
+        "mega" : {"name" : "Mega", "img" : "orbmega", "color" : "green", "duration" : 1, "action" : function () {game.playerArray[0].changeMode('mega', this.duration, this.color, this.name);}},
+        "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "color" : "purple", "duration" : 2, "action" : function () {game.playerArray[0].changeWeapon("dualLaser", this.duration, this.color, this.name);}},
+        "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "color" : "yellow", "duration" : 3, "action" : function () {game.playerArray[0].changeWeapon("shockWave", this.duration, this.color, this.name);}},
+        "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming",  "color" : "red", "duration" : 4, "action" : function () {game.playerArray[0].changeWeapon("homingMissile", this.duration, this.color, this.name);}},
+        "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy",  "color" : "blue", "duration" : 5, "action" : function () {game.playerArray[0].changeWeapon("bouncyBalls", this.duration, this.color, this.name);}},
+        "drill" : {"name" : "Drill", "img" : "orbdrill", "color" : "orange", "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill');}},
+        "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "color" : "black", "duration" : 7, "action" : function () {game.playerArray[0].changeWeapon("hellFire", this.duration, this.color, this.name);}}
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
         "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Placebo", "velx" : 10, "vely" : 0, "radius" : 10, "color" : "white"})}},
