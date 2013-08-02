@@ -5,7 +5,8 @@
         #results li.pass { color: green; }
         #results li.fail { color: red; }
     </style>
-    <script src="jquery-1.9.0.min.js"></script>
+  <!--  <script src="jquery-1.9.0.min.js"></script> -->
+    <script src="jquery-1.10.2.js"></script>
     <script src="myFunctions.js"></script>
 </head>
 <body>
@@ -60,7 +61,7 @@ Game.prototype = {
                     levelOne : {
                         "type" : "sideScrollLevel",
                         "background" : "theSea",
-                        "timer" : 20,
+                        "timer" : 5,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
                         "opponents": ["Bill", "Frank", "Sam", "Luciano"],
                         "win" : "levelTwo"
@@ -68,7 +69,7 @@ Game.prototype = {
                     levelTwo : {
                         "type" : "sideScrollLevel",
                         "background" : "planetview",
-                        "timer" : 20,
+                        "timer" : 5,
                         //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
                         "opponents": ["Sam", "Darren"],
                         "win" : "secondScreen"
@@ -416,7 +417,7 @@ var sideScrollLevel = {
         };
         this.die = function () {
             game.lives -= 1;
-            var levelToLoad = game.lives > 0 ? "levelOne" : "loseScreen";
+            var levelToLoad = game.lives > 0 ? game.currentLevel : "loseScreen";
             game.loadGameLoop(levelToLoad);
         };
         this.changeWeapon = function(weapon, duration, color, title) {
