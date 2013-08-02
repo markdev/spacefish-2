@@ -310,10 +310,17 @@ var sideScrollLevel = {
                 }
             }
         }
-        // render time // TODO make this sensible
-        game.bufferCanvasCtx.font = "20pt Arial";
-        game.bufferCanvasCtx.fillStyle = "white";
-        game.bufferCanvasCtx.fillText(String(game.playerArray[0].weaponStartTime + " | " + game.playerArray[0].weaponCurrentTime + " | " + game.playerArray[0].weaponEndTime), 100, 100);
+
+        if (game.playerArray[0].weapon !== "peaShooter") {
+            game.bufferCanvasCtx.font = "20pt Arial";
+            game.bufferCanvasCtx.fillStyle = "white";
+            game.bufferCanvasCtx.fillText(String(((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2)), 100, 100);
+
+            game.bufferCanvasCtx.fillStyle = "red";
+            var startX = (game.bufferCanvas.width/2) - ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2);
+            var endX = ((game.playerArray[0].weaponEndTime - game.playerArray[0].weaponCurrentTime) / (game.playerArray[0].weaponEndTime - game.playerArray[0].weaponStartTime)) * (game.bufferCanvas.width/2) * 2;
+            game.bufferCanvasCtx.fillRect(startX, game.bufferCanvas.height-50, endX * 2, 50);
+        }
     },
     "events" : [
         {"event" : "mousedown", "action" : function() {
