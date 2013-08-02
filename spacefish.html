@@ -62,7 +62,7 @@ Game.prototype = {
                         "background" : "theSea",
                         "timer" : 20,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Darren"],
+                        "opponents": ["CrabCakes", "Sam"],
                         "win" : "levelTwo"
                     },
                     levelTwo : {
@@ -242,6 +242,7 @@ var sideScrollLevel = {
         game.playerArray[game.playerArray.length] = new sideScrollLevel.Player({ x : 0, y : canvas.height/2, w : 120, h : 60 });
 
         // Create the main display
+ //       game.displayArray[game.displayArray.length] = new sideScrollLevel.Display(sideScrollLevel.DisplayData.topBar);
         game.displayArray[game.displayArray.length] = new sideScrollLevel.Display({"level" : game.currentLevel, "score" : game.score, "time" : 30, "lives" : game.lives,
             "update" : function() {},
             "render" : function() {
@@ -312,7 +313,7 @@ var sideScrollLevel = {
         // render time // TODO make this sensible
         game.bufferCanvasCtx.font = "20pt Arial";
         game.bufferCanvasCtx.fillStyle = "white";
-        game.bufferCanvasCtx.fillText(String(game.time - game.startTime).substring(0,2), 100, 100);
+        game.bufferCanvasCtx.fillText(String(game.playerArray[0].weaponStartTime + " | " + game.playerArray[0].weaponCurrentTime + " | " + game.playerArray[0].weaponEndTime), 100, 100);
     },
     "events" : [
         {"event" : "mousedown", "action" : function() {
@@ -351,7 +352,15 @@ var sideScrollLevel = {
         this.mode = "normal";
         this.img = "spaceShipA";
         this.weapon = "peaShooter";
-        this.update = function () {};
+        this.weaponStartTime = 0;
+        this.weaponEndTime = 0;
+        this.weaponCurrentTime = 0;
+        this.update = function () {
+            if (this.weapon !== "peaShooter") {
+                this.weaponCurrentTime = +new Date();
+                if (this.weaponCurrentTime > this.weaponEndTime) this.changeWeapon("peaShooter");
+            }
+        };
         this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
             if (this.mode == "mega") {
                 this.changeMode('normal');
@@ -366,6 +375,11 @@ var sideScrollLevel = {
             game.lives -= 1;
             var levelToLoad = game.lives > 0 ? "levelOne" : "loseScreen";
             game.loadGameLoop(levelToLoad);
+        };
+        this.changeWeapon = function(weapon, duration) {
+            this.weapon = weapon;
+            this.weaponStartTime = +new Date();
+            this.weaponEndTime = this.weaponStartTime + (duration * 1000);
         };
         this.changeMode = function(mode) {
             var modes = {
@@ -475,13 +489,13 @@ var sideScrollLevel = {
         "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
-        "mega" : {"name" : "Mega", "img" : "orbmega", "action" : function () {game.playerArray[0].changeMode('mega');}},
-        "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "action" : function () {game.playerArray[0].weapon = "dualLaser";}},
-        "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "action" : function () {game.playerArray[0].weapon = "shockWave";}},
-        "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming", "action" : function () {game.playerArray[0].weapon = "homingMissile";}},
-        "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy", "action" : function () {game.playerArray[0].weapon = "bouncyBalls";}},
-        "drill" : {"name" : "Drill", "img" : "orbdrill", "action" : function () {game.playerArray[0].changeMode('drill');}},
-        "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "action" : function () {game.playerArray[0].weapon = "hellFire";}}
+        "mega" : {"name" : "Mega", "img" : "orbmega", "duration" : 1, "action" : function () {game.playerArray[0].changeMode('mega', this.duration);}},
+        "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "duration" : 2, "action" : function () {game.playerArray[0].changeWeapon("dualLaser", this.duration);}},
+        "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "duration" : 3, "action" : function () {game.playerArray[0].changeWeapon("shockWave", this.duration);}},
+        "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming",  "duration" : 4, "action" : function () {game.playerArray[0].changeWeapon("homingMissile", this.duration);}},
+        "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy",  "duration" : 5, "action" : function () {game.playerArray[0].changeWeapon("bouncyBalls", this.duration);}},
+        "drill" : {"name" : "Drill", "img" : "orbdrill",  "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill');}},
+        "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire",  "duration" : 7, "action" : function () {game.playerArray[0].changeWeapon("hellFire", this.duration);}}
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
         "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Placebo", "velx" : 10, "vely" : 0, "radius" : 10, "color" : "white"})}},
@@ -490,6 +504,21 @@ var sideScrollLevel = {
         "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Coke", "velx" : 5, "vely" : 0, "update" : function () { if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;} this.x += this.velx;}, "radius" : 20, "color" : "red"})}},
         "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "LSD", "velx" : 10, "vely" : Math.round(Math.random()*2 - 1) * 10, "update" : function () {this.x += this.velx; this.y += this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height) this.vely = -this.vely;}, "radius" : 10, "color" : "purple"})}},
         "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "radius" : 10, "color" : "red"})}}
+    },
+    "DisplayData" : {
+        // TODO: make the topBar object work, "game" was undefined.
+   /*     "topBar" : {"level" : game.currentLevel, "score" : game.score, "time" : 30, "lives" : game.lives,
+            "update" : function() {},
+            "render" : function() {
+                game.bufferCanvasCtx.font = "20pt Arial";
+                game.bufferCanvasCtx.fillStyle = "white";
+                var ymargin = 30;
+                game.bufferCanvasCtx.fillText("Level: " + game.currentLevel, 20, ymargin);
+                game.bufferCanvasCtx.fillText("Score: " + game.score, 300, ymargin);
+                game.bufferCanvasCtx.fillText("Time: " + game.currentTime.substr(0,2), 500, ymargin);
+                game.bufferCanvasCtx.fillText("Lives: " + game.lives, 800, ymargin);
+            }
+        } */
     }
 }
 
