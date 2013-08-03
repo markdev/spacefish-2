@@ -16,6 +16,17 @@
 <ul id="results"></ul>
 
 <script>
+window.requestAnimFrame = function(){
+    return (
+            window.requestAnimationFrame       ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+            function(/* function */ callback) { window.setTimeout(callback, 1000 / 60);}
+           );
+}();
+
 var Game = function () {
     this.canvas = document.getElementById("canvas");
     this.ctx = canvas.getContext("2d");
@@ -26,7 +37,7 @@ var Game = function () {
 
     this.intervals = [];
 
-    this.gameLoop = {};
+    this.gameLoop = {cancelAnimationFrame : true};
 
     this.time = 0;
     this.startTime = 0;
@@ -74,9 +85,9 @@ Game.prototype = {
                         "timer" : 5,
                         //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
                         "opponents": ["Sam", "Darren"],
-                        "win" : "secondScreen"
+                        "win" : "winScreen"
                     },
-                    secondScreen : {
+                    winScreen : {
                         "type" : "basicSplashScreen",
                         "background" : "youWin",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
@@ -105,55 +116,48 @@ Game.prototype = {
         game.loadGameLoop("splashScreen");
     },
 
-    removeListeners : function(listener) {
-        game.canvas.removeEventListener(listener.event, listener.action);
-    },
-
-    addListeners : function(listener) {
-        game.canvas.addEventListener(listener.event, listener.action);
-    },
-
-    loadGameLoop : function(gameScreen) {
-        // start gameLoop
+    loadGameLoop : function(gameLoopType) {
+        // stop the current gameLoop, otherwise the previous loop will keep rendering
         game.gameLoop.cancelAnimationFrame = true;
-        var gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
-        game.currentLevel = gameScreen;
-        var d = new Date();
-        var n = String(d.getTime());
-        game.startTime = n.substring(10);
-        this.gameLoop = new GameLoop(spaceFishData[gameScreen]);
+
+        // initialize gameLoop variables
+        var gameLoopType = (typeof gameLoopType === "undefined")? "splashScreen" : gameLoopType;
+        game.currentLevel = gameLoopType;
+        game.startTime = String(new Date().getTime()).substring(10);
+        this.gameLoop = new GameLoop(spaceFishData[gameLoopType]);
 
         // remove all the event handlers and empty this.events
         if (this.events.length > 0) {
             for (var i=0, len=this.events.length-1; i<=len; i++) {
-                game.removeListeners(this.events[0]);
+                game.canvas.removeEventListener(this.events[0].event, this.events[0].action);
                 this.events.shift();
             }
         }
+
         // load this.events and add handlers
         if (this.events.length == 0) {
             // load from game data
-            if (spaceFishData[gameScreen].hasOwnProperty('events')) {       // TODO: see if these two if/for loops can be refactored
-                for (var i=0; i<=spaceFishData[gameScreen]['events'].length-1; i++) {
-                    this.events[this.events.length] = spaceFishData[gameScreen]['events'][i];
-                    game.addListeners(this.events[this.events.length-1]);
+            if (spaceFishData[gameLoopType].hasOwnProperty('events')) {       // TODO: see if these two if/for loops can be refactored
+                for (var i=0; i<=spaceFishData[gameLoopType]['events'].length-1; i++) {
+                    this.events[this.events.length] = spaceFishData[gameLoopType]['events'][i];
+                    game.canvas.addEventListener(this.events[this.events.length-1].event, this.events[this.events.length-1].action);
                 }
             }
             // load from level function
-            if (window[spaceFishData[gameScreen].type].hasOwnProperty('events')) {
-                for (var i=0; i<=window[spaceFishData[gameScreen].type].events.length-1; i++) {
-                    this.events[this.events.length] = window[spaceFishData[gameScreen].type]['events'][i];
-                    game.addListeners(this.events[this.events.length-1]);
+            if (window[spaceFishData[gameLoopType].type].hasOwnProperty('events')) {
+                for (var i=0; i<=window[spaceFishData[gameLoopType].type].events.length-1; i++) {
+                    this.events[this.events.length] = window[spaceFishData[gameLoopType].type]['events'][i];
+                    game.canvas.addEventListener(this.events[this.events.length-1].event, this.events[this.events.length-1].action);
                 }
             }
         }
 
         // assign members to this.gameLoop from levelData
-        for (var key in spaceFishData[gameScreen]) {
-            this.gameLoop[key] = spaceFishData[gameScreen][key];
+        for (var key in spaceFishData[gameLoopType]) {
+            this.gameLoop[key] = spaceFishData[gameLoopType][key];
         }
         // extend an invoked function with an object
-        extend(this.gameLoop, window[spaceFishData[gameScreen].type]);
+        extend(this.gameLoop, window[spaceFishData[gameLoopType].type]);
 
         // clear all the existing intervals
         if (typeof game.intervals[0] !== 'undefined') {
@@ -188,13 +192,13 @@ var GameLoop = function(level) {
         self.render();
         self.drawbuffer();
         if (self.cancelAnimationFrame == false) {
-            requestAnimationFrame(self.animate);    // TODO: accommodate mozRequestAnimationFrame, etc
+            window.requestAnimFrame(self.animate);    // TODO: accommodate mozRequestAnimationFrame, etc
         }
     };
 }
 
 /*
- *    GameLoop Level Types
+ *    GameLoop Types
  *
  */
 
