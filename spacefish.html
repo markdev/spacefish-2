@@ -26,6 +26,8 @@ var Game = function () {
 
     this.intervals = [];
 
+    this.gameLoop = {};
+
     this.time = 0;
     this.startTime = 0;
 
@@ -100,7 +102,6 @@ Game.prototype = {
     initialize : function() {
         game.lives = 5;
         game.score = 0;
-        game.gameLoop = new GameLoop("nullScreen");           // TODO: This is a hideous solution to not being able to call game.gameLoop.cancelAnimationFrame conditionally
         game.loadGameLoop("splashScreen");
     },
 
@@ -114,7 +115,7 @@ Game.prototype = {
 
     loadGameLoop : function(gameScreen) {
         // start gameLoop
-        game.gameLoop.cancelAnimationFrame = true;          // TODO: find a way to do this conditionally, without having to load the null screen
+        game.gameLoop.cancelAnimationFrame = true;
         var gameScreen = (typeof gameScreen === "undefined")? "splashScreen" : gameScreen;
         game.currentLevel = gameScreen;
         var d = new Date();
@@ -169,6 +170,7 @@ Game.prototype = {
     }
 }
 
+
 var GameLoop = function(level) {
     var self = this;
     this.cancelAnimationFrame = false;
@@ -195,7 +197,6 @@ var GameLoop = function(level) {
  *    GameLoop Level Types
  *
  */
-var nullScreen = {};
 
 var basicSplashScreen = {
   /*  "initialize" : (function () {
@@ -358,6 +359,8 @@ var sideScrollLevel = {
      *    Game Object Prototypes
      *
      */
+
+
 
     "GameObject" : { "terminate" : false, "name" : "", "x" : 0, "y" : 0, "velx" : 0, "vely" : 0, "w" : 30, "h" : 15,
                      "update" : function () {this.x += this.velx; this.y += this.vely;},
