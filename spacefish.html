@@ -63,8 +63,8 @@ Game.prototype = {
             } else {
                 // <!-- Move this into a script later
                 window.spaceFishData = {
-                    splashScreen : {
-                        "type" : "basicSplashScreen",   // Integrate this
+                    startScreen : {
+                        "type" : "startScreen",   // Integrate this
                         "background" : "startScreen",
                         "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                         "events" : [
@@ -74,9 +74,9 @@ Game.prototype = {
                     levelOne : {
                         "type" : "sideScrollLevel",
                         "background" : "theSea",
-                        "timer" : 5,
+                        "timer" : 50,
                //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Bill", "Frank", "Sam", "Luciano"],
+                        "opponents": ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"],
                         "win" : "levelTwo"
                     },
                     levelTwo : {
@@ -92,7 +92,7 @@ Game.prototype = {
                         "background" : "youWin",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                         "events" : [
-                            {"event" : "mousedown", "action" : function() {game.loadGameLoop("splashScreen");}}
+                            {"event" : "mousedown", "action" : function() {game.loadGameLoop("startScreen");}}
                         ]
                     },
                     loseScreen : {
@@ -113,7 +113,7 @@ Game.prototype = {
     initialize : function() {
         game.lives = 5;
         game.score = 0;
-        game.loadGameLoop("splashScreen");
+        game.loadGameLoop("startScreen");
     },
 
     loadGameLoop : function(gameLoopType) {
@@ -121,43 +121,43 @@ Game.prototype = {
         game.gameLoop.cancelAnimationFrame = true;
 
         // initialize gameLoop variables
-        var gameLoopType = (typeof gameLoopType === "undefined")? "splashScreen" : gameLoopType;
+        var gameLoopType = (typeof gameLoopType === "undefined")? "startScreen" : gameLoopType;
         game.currentLevel = gameLoopType;
-        game.startTime = String(new Date().getTime()).substring(10);
-        this.gameLoop = new GameLoop(spaceFishData[gameLoopType]);
+        game.startTime = String(new Date().getTime()).substring(10);    // TODO: revisit when testing game time to make sure this works
+        game.gameLoop = new GameLoop();
 
         // remove all the event handlers and empty this.events
-        if (this.events.length > 0) {
-            for (var i=0, len=this.events.length-1; i<=len; i++) {
-                game.canvas.removeEventListener(this.events[0].event, this.events[0].action);
-                this.events.shift();
+        if (game.events.length > 0) {
+            for (var i=0, len=game.events.length-1; i<=len; i++) {
+                game.canvas.removeEventListener(game.events[0].event, game.events[0].action);
+                game.events.shift();
             }
         }
 
-        // load this.events and add handlers
-        if (this.events.length == 0) {
+        // load game.events and add handlers
+        if (game.events.length == 0) {
             // load from game data
-            if (spaceFishData[gameLoopType].hasOwnProperty('events')) {       // TODO: see if these two if/for loops can be refactored
+            if (spaceFishData[gameLoopType].hasOwnProperty('events')) {
                 for (var i=0; i<=spaceFishData[gameLoopType]['events'].length-1; i++) {
-                    this.events[this.events.length] = spaceFishData[gameLoopType]['events'][i];
-                    game.canvas.addEventListener(this.events[this.events.length-1].event, this.events[this.events.length-1].action);
+                    game.events[game.events.length] = spaceFishData[gameLoopType]['events'][i];
+                    game.canvas.addEventListener(game.events[game.events.length-1].event, game.events[game.events.length-1].action);
                 }
             }
             // load from level function
             if (window[spaceFishData[gameLoopType].type].hasOwnProperty('events')) {
                 for (var i=0; i<=window[spaceFishData[gameLoopType].type].events.length-1; i++) {
-                    this.events[this.events.length] = window[spaceFishData[gameLoopType].type]['events'][i];
-                    game.canvas.addEventListener(this.events[this.events.length-1].event, this.events[this.events.length-1].action);
+                    game.events[game.events.length] = window[spaceFishData[gameLoopType].type]['events'][i];
+                    game.canvas.addEventListener(game.events[game.events.length-1].event, game.events[game.events.length-1].action);
                 }
             }
         }
 
-        // assign members to this.gameLoop from levelData
+        // assign members to game.gameLoop from levelData
         for (var key in spaceFishData[gameLoopType]) {
-            this.gameLoop[key] = spaceFishData[gameLoopType][key];
+            game.gameLoop[key] = spaceFishData[gameLoopType][key];
         }
         // extend an invoked function with an object
-        extend(this.gameLoop, window[spaceFishData[gameLoopType].type]);
+        extend(game.gameLoop, window[spaceFishData[gameLoopType].type]); // TODO: fix the extend function, remember to search
 
         // clear all the existing intervals
         if (typeof game.intervals[0] !== 'undefined') {
@@ -167,15 +167,15 @@ Game.prototype = {
         }
 
         // start this shit
-        this.gameLoop.initialize();
+        game.gameLoop.initialize();
 
         // run the animation loop
-        this.gameLoop.animate();
+        game.gameLoop.animate();
     }
 }
 
 
-var GameLoop = function(level) {
+var GameLoop = function() {
     var self = this;
     this.cancelAnimationFrame = false;
     this.initialize = function() {};
@@ -192,7 +192,7 @@ var GameLoop = function(level) {
         self.render();
         self.drawbuffer();
         if (self.cancelAnimationFrame == false) {
-            window.requestAnimFrame(self.animate);    // TODO: accommodate mozRequestAnimationFrame, etc
+            window.requestAnimFrame(self.animate);
         }
     };
 }
@@ -202,11 +202,8 @@ var GameLoop = function(level) {
  *
  */
 
+
 var basicSplashScreen = {
-  /*  "initialize" : (function () {
-        game.lives = 3;
-        game.score = 0;
-    } ()),  */
     "clearScreen" : function() {
         game.bufferCanvasCtx.drawImage(window['game']['img'][this.background], 0, 0);
     },
@@ -221,13 +218,21 @@ var basicSplashScreen = {
     }
 }
 
+var startScreen = {
+    "initialize" : function () {
+        game.lives = 3;
+        game.score = 0;
+    }
+}
+extend(startScreen, basicSplashScreen);
+
 var sideScrollLevel = {
     "initialize" : function() {
         game.startTime = +new Date();
         game.elapsedTime = undefined;
         game.levelTime = window.spaceFishData[game.currentLevel].timer * 1000;
 
-        game.levelShift = 0; // TODO: fix this gayness
+        game.backgroundShift = 0; // TODO: fix this gayness
 
         game.playerArray = [];
         game.playerProjectileArray = [];
@@ -241,7 +246,7 @@ var sideScrollLevel = {
             { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j); game.playerProjectileArray.splice(i,1);}}},
             { "name" : "opponentProjectileArray", "collidesWith" : "playerArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j);  game.opponentProjectileArray.splice(i,1);}}},
             { "name" : "opponentArray"},
-            { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) {game.itemArray[i].action(); game.itemArray.splice(i,1);}}},
+            { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { /*game.itemArray[i].action();*/ game.playerArray[0].loadItem(game.itemArray[i]); game.itemArray.splice(i,1);}}},
             { "name" : "effectArray"},
             { "name" : "displayArray"}
         ];
@@ -273,11 +278,11 @@ var sideScrollLevel = {
         game.bufferCanvasCtx.fillStyle = "black";
         game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
 
-        game.bufferCanvasCtx.drawImage(game['img'][window.spaceFishData[game.currentLevel].background], game.levelShift, 0);
+        game.bufferCanvasCtx.drawImage(game['img'][window.spaceFishData[game.currentLevel].background], game.backgroundShift, 0);
     },
     "update" : function() {
         // shift background
-        game.levelShift -= .2;
+        game.backgroundShift -= .2;
 
         // update game time
         game.currentTime = String(game.levelTime - (+new Date() - game.startTime));
@@ -383,10 +388,9 @@ var sideScrollLevel = {
         this.init = sideScrollLevel.GameObjectInit(self, argData);
 
         this.name = "player";
-
         this.health = 1;
         this.img = "spaceShipA";
-        this.weapon = { // TODO change title parameter in data file (name) to title
+        this.weapon = {
             "name" : "peaShooter",
             "color" : "white",
             "title" : "Pea Shooter",
@@ -405,16 +409,16 @@ var sideScrollLevel = {
         this.update = function () {
             if (this.weapon.name !== "peaShooter") {
                 this.weapon.currentTime = +new Date();
-                if (this.weapon.currentTime > this.weapon.endTime) this.changeWeapon("peaShooter");
+                if (this.weapon.currentTime > this.weapon.endTime) this.changeWeapon({"weapon" : "peaShooter"});
             }
             if (this.mode.name !== "normal") {
                 this.mode.currentTime = +new Date();
-                if (this.mode.currentTime > this.mode.endTime) this.changeMode("normal");
+                if (this.mode.currentTime > this.mode.endTime) this.changeMode({"mode" : "normal"});
             }
         };
         this.getHit = function () {         //TODO: create a more robust, dynamic way of involving items
             if (self.mode.name == "mega") {
-                self.changeMode('normal');
+                self.changeMode({"mode" : "normal"});
             } else if (self.mode.name == "drill") {
                 // nothing happens!  //TODO: add effect?
             } else if (self.mode.name == "normal") {
@@ -427,33 +431,40 @@ var sideScrollLevel = {
             var levelToLoad = game.lives > 0 ? game.currentLevel : "loseScreen";
             game.loadGameLoop(levelToLoad);
         };
-        this.changeWeapon = function(weapon, duration, color, title) {
-            this.weapon.name = weapon;
-            this.weapon.startTime = +new Date();
-            this.weapon.endTime = this.weapon.startTime + (duration * 1000);
-            this.weapon.color = color;
-            this.weapon.title = title;
+        this.loadItem = function(itemData) {
+            if (itemData.hasOwnProperty("weapon")) {
+                self.changeWeapon(itemData);
+            } else if (itemData.hasOwnProperty("mode")) {
+                self.changeMode(itemData);
+            }
         };
-        this.changeMode = function(mode) {
+        this.changeWeapon = function (itemData) {
+            this.weapon.name = itemData.weapon;
+            this.weapon.startTime = +new Date();
+            this.weapon.endTime = this.weapon.startTime + (itemData.duration * 1000);
+            this.weapon.color = itemData.color;
+            this.weapon.title = itemData.title;
+        };
+        this.changeMode = function(itemData) {
             var modes = {
                 "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "color" : "white", "health" : 1, "img" : "spaceShipA"},
-                "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 2, "health" : 2, "img" : "spaceShipMegaA"},
+                "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 10, "health" : 2, "img" : "spaceShipMegaA"},
                 "drill" : {"mode" : "drill", "h" : 60, "w" : 145,  "color" : "orange", "duration" : 2, "health" : 1, "img" : "spaceShipShieldA"}
             };
-            for (var key in modes[mode]) {
-                if (modes[mode].hasOwnProperty(key)) {
+            for (var key in modes[itemData.mode]) {
+                if (modes[itemData.mode].hasOwnProperty(key)) {
                     if (key === "mode") {
-                        self.mode.name = modes[mode][key];      // TODO: make polymorphic?  Maybe?
+                        self.mode.name = modes[itemData.mode][key];      // TODO: make polymorphic?  Maybe?
                     } else {
-                        self[key] = modes[mode][key];
+                        self[key] = modes[itemData.mode][key];
                     }
                 }
             }
-            if (mode !== "normal") {
+            if (itemData.mode !== "normal") {
                 self.mode.startTime = +new Date();
-                self.mode.endTime = self.mode.startTime + (modes[mode].duration * 1000);
-                self.mode.color = modes[mode].color;
-                self.mode.title = mode;
+                self.mode.endTime = self.mode.startTime + (modes[itemData.mode].duration * 1000);
+                self.mode.color = modes[itemData.mode].color;
+                self.mode.title = itemData.mode;
             }
         };
     },
@@ -464,7 +475,7 @@ var sideScrollLevel = {
         this.source = typeof argData.source !== "undefined" ? argData.source : "player";
         this.x = typeof argData.x !== "undefined" ? argData.x : game.playerArray[0].w;
         this.y = typeof argData.y !== "undefined" ? argData.y : game.playerArray[0].y + game.playerArray[0].h/2;
-        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 0;       // TODO: add radius?
+        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 10;       // TODO: add radius?
         this.color = typeof argData.color !== "undefined" ? argData.color : "white";
         this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {
             if (this.x > canvas.width || this.x < this.radius) {
@@ -551,21 +562,22 @@ var sideScrollLevel = {
         "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
-        "mega" : {"name" : "Mega", "img" : "orbmega", "color" : "green", "duration" : 1, "action" : function () {game.playerArray[0].changeMode('mega', this.duration, this.color, this.name);}},
-        "dualLaser" : {"name" : "Dual Laser", "img" : "orblaser", "color" : "purple", "duration" : 2, "action" : function () {game.playerArray[0].changeWeapon("dualLaser", this.duration, this.color, this.name);}},
-        "shockWave" : {"name" : "Shock Wave", "img" : "orbshock", "color" : "yellow", "duration" : 3, "action" : function () {game.playerArray[0].changeWeapon("shockWave", this.duration, this.color, this.name);}},
-        "homingMissile" : {"name" : "Homing Missile", "img" : "orbhoming",  "color" : "red", "duration" : 4, "action" : function () {game.playerArray[0].changeWeapon("homingMissile", this.duration, this.color, this.name);}},
-        "bouncyBalls" : {"name" : "Bouncy Balls", "img" : "orbbouncy",  "color" : "blue", "duration" : 5, "action" : function () {game.playerArray[0].changeWeapon("bouncyBalls", this.duration, this.color, this.name);}},
-        "drill" : {"name" : "Drill", "img" : "orbdrill", "color" : "orange", "duration" : 6, "action" : function () {game.playerArray[0].changeMode('drill', this.duration, this.color, this.name);}},
-        "hellFire" : {"name" : "Hell Fire", "img" : "orbhellfire", "color" : "black", "duration" : 7, "action" : function () {game.playerArray[0].changeWeapon("hellFire", this.duration, this.color, this.name);}}
+        "normal" : {"mode" : "normal"},
+        "mega" : {"title" : "Mega", "mode" : "mega", "img" : "orbmega", "color" : "green", "duration" : 20},
+        "dualLaser" : {"title" : "Dual Laser", "weapon" : "dualLaser", "img" : "orblaser", "color" : "purple", "duration" : 2},
+        "shockWave" : {"title" : "Shock Wave", "weapon" : "shockWave", "img" : "orbshock", "color" : "yellow", "duration" : 3},
+        "homingMissile" : {"title" : "Homing Missile", "weapon" : "homingMissile", "img" : "orbhoming",  "color" : "red", "duration" : 4},
+        "bouncyBalls" : {"title" : "Bouncy Balls", "weapon" : "bouncyBalls", "img" : "orbbouncy",  "color" : "blue", "duration" : 5},
+        "drill" : {"title" : "Drill", "mode" : "drill", "img" : "orbdrill", "color" : "orange", "duration" : 6},
+        "hellFire" : {"title" : "Hell Fire", "weapon" : "hellFire", "img" : "orbhellfire", "color" : "black", "duration" : 7}
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
-        "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Placebo", "velx" : 10, "vely" : 0, "radius" : 10, "color" : "white"})}},
-        "dualLaser" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)-15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"}); game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)+15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"});}},
-        "shockWave" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Molly", "velx" : 10, "vely" : 0, "update" : function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;}, "radius" : 10, "color" : "yellow"})}},
-        "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Coke", "velx" : 5, "vely" : 0, "update" : function () { if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;} this.x += this.velx;}, "radius" : 20, "color" : "red"})}},
-        "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "LSD", "velx" : 10, "vely" : Math.round(Math.random()*2 - 1) * 10, "update" : function () {this.x += this.velx; this.y += this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height) this.vely = -this.vely;}, "radius" : 10, "color" : "purple"})}},
-        "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "radius" : 10, "color" : "red"})}}
+        "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Placebo", "velx" : 10, "vely" : 0, "color" : "white"})}},
+        "dualLaser" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)-15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"}); game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)+15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"});}},
+        "shockWave" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Molly", "velx" : 10, "vely" : 0, "update" : function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;}, "color" : "yellow"})}},
+        "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Coke", "velx" : 5, "vely" : 0, "update" : function () { if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;} this.x += this.velx;}, "radius" : 20, "color" : "red"})}},
+        "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "LSD", "velx" : 10, "vely" : Math.round(Math.random()*2 - 1) * 10, "update" : function () {this.x += this.velx; this.y += this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height) this.vely = -this.vely;}, "color" : "purple"})}},
+        "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "color" : "red"})}}
     },
     "DisplayData" : {
         // TODO: make the topBar object work, "game" was undefined.
