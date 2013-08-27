@@ -64,40 +64,36 @@ Game.prototype = {
                 // <!-- Move this into a script later
                 window.spaceFishData = {
                     startScreen : {
-                        "type" : "startScreen",   // Integrate this
-                        "background" : "startScreen",
-                        "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
+                        "type" : "startScreen", "background" : "startScreen", "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
                         "events" : [
                             {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne");}}
                         ]
                     },
                     levelOne : {
-                        "type" : "sideScrollLevel",
-                        "background" : "theSea",
-                        "timer" : 50,
-               //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"],
-                        "win" : "levelTwo"
+                        "type" : "sideScrollLevel", "background" : "theSea", "timer" : 10,
+                        "opponents": ["CrabCakes", "Sam"], "win" : "levelTwo"
                     },
                     levelTwo : {
-                        "type" : "sideScrollLevel",
-                        "background" : "planetview",
-                        "timer" : 5,
-                        //         "opponents" : ["Bill", "Sam", "Luciano", "Homer", "Darren", "Frank", "CrabCakes"]
-                        "opponents": ["Sam", "Darren"],
-                        "win" : "winScreen"
+                        "type" : "sideScrollLevel", "background" : "planetview", "timer" : 15,
+                        "opponents": ["Sam", "Darren"], "win" : "levelThree"
+                    },
+                    levelThree : {
+                        "type" : "sideScrollLevel", "background" : "seasky", "timer" : 20,
+                        "opponents": ["Luciano", "Homer"], "win" : "levelFour"
+                    },
+                    levelFour : {
+                        "type" : "sideScrollLevel", "background" : "AGHeads", "timer" : 25,
+                        "opponents": ["Sam", "Darren"], "win" : "winScreen"
                     },
                     winScreen : {
-                        "type" : "basicSplashScreen",
-                        "background" : "youWin",
+                        "type" : "basicSplashScreen", "background" : "youWin",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                         "events" : [
                             {"event" : "mousedown", "action" : function() {game.loadGameLoop("startScreen");}}
                         ]
                     },
                     loseScreen : {
-                        "type" : "basicSplashScreen",
-                        "background" : "youLose",
+                        "type" : "basicSplashScreen", "background" : "youLose",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                         "events" : [
                             {"event" : "mousedown", "action" : function() {game.initialize();}}
@@ -123,7 +119,7 @@ Game.prototype = {
         // initialize gameLoop variables
         var gameLoopType = (typeof gameLoopType === "undefined")? "startScreen" : gameLoopType;
         game.currentLevel = gameLoopType;
-        game.startTime = String(new Date().getTime()).substring(10);    // TODO: revisit when testing game time to make sure this works
+        game.startTime = String(new Date().getTime()).substring(10);
         game.gameLoop = new GameLoop();
 
         // remove all the event handlers and empty this.events
@@ -224,10 +220,18 @@ var startScreen = {
         game.score = 0;
     }
 }
-extend(startScreen, basicSplashScreen);
+extend(startScreen, basicSplashScreen); // TODO: fix this gay ass function
+
+
 
 var sideScrollLevel = {
     "initialize" : function() {
+        //splash screen
+        game.bufferCanvasCtx.fillStyle = "red";
+        game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvas.width, game.bufferCanvas.height);
+
+
+
         game.startTime = +new Date();
         game.elapsedTime = undefined;
         game.levelTime = window.spaceFishData[game.currentLevel].timer * 1000;
@@ -255,7 +259,6 @@ var sideScrollLevel = {
         game.playerArray[game.playerArray.length] = new sideScrollLevel.Player({ x : 0, y : canvas.height/2, w : 120, h : 60 });
 
         // Create the main display
- //       game.displayArray[game.displayArray.length] = new sideScrollLevel.Display(sideScrollLevel.DisplayData.topBar);
         game.displayArray[game.displayArray.length] = new sideScrollLevel.Display({"level" : game.currentLevel, "score" : game.score, "time" : 30, "lives" : game.lives,
             "update" : function() {},
             "render" : function() {
@@ -390,22 +393,8 @@ var sideScrollLevel = {
         this.name = "player";
         this.health = 1;
         this.img = "spaceShipA";
-        this.weapon = {
-            "name" : "peaShooter",
-            "color" : "white",
-            "title" : "Pea Shooter",
-            "startTime" : 0,
-            "endTime" : 0,
-            "currentTime" : 0
-        };
-        this.mode = {
-            "name" : "normal",
-            "color" : "white",
-            "title" : "Normal",
-            "startTime" : 0,
-            "endTime" : 0,
-            "currentTime" : 0
-        };
+        this.weapon = {"name" : "peaShooter", "color" : "white", "title" : "Pea Shooter", "startTime" : 0, "endTime" : 0, "currentTime" : 0 };
+        this.mode = {"name" : "normal", "color" : "white", "title" : "Normal", "startTime" : 0, "endTime" : 0, "currentTime" : 0 };
         this.update = function () {
             if (this.weapon.name !== "peaShooter") {
                 this.weapon.currentTime = +new Date();
@@ -420,16 +409,33 @@ var sideScrollLevel = {
             if (self.mode.name == "mega") {
                 self.changeMode({"mode" : "normal"});
             } else if (self.mode.name == "drill") {
-                // nothing happens!  //TODO: add effect?
+                // nothing happens!
             } else if (self.mode.name == "normal") {
                 self.health -= 1;
                 self.die();
             }
         };
         this.die = function () {
-            game.lives -= 1;
-            var levelToLoad = game.lives > 0 ? game.currentLevel : "loseScreen";
-            game.loadGameLoop(levelToLoad);
+            game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({
+                "x" : self.x,
+                "y" : self.y,
+                "img" : "explosionSprite",
+                "update" : function() {
+                    this.sx += 100;
+                    if (this.sx >= 600) {
+                        this.sx = 0;
+                        this.sy += 100;
+                    } if (this.sy > 600) {
+                        this.terminate = true;
+                        game.lives -= 1;
+                        var levelToLoad = game.lives > 0 ? game.currentLevel : "loseScreen";
+                        game.loadGameLoop(levelToLoad);
+                    }
+                },
+                "render" : function() {
+                    game.bufferCanvasCtx.drawImage(game['img'][this.img], this.sx, this.sy, 100, 100, this.x, this.y, 200, 200)
+                }
+            });
         };
         this.loadItem = function(itemData) {
             if (itemData.hasOwnProperty("weapon")) {
@@ -446,11 +452,7 @@ var sideScrollLevel = {
             this.weapon.title = itemData.title;
         };
         this.changeMode = function(itemData) {
-            var modes = {
-                "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "color" : "white", "health" : 1, "img" : "spaceShipA"},
-                "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 10, "health" : 2, "img" : "spaceShipMegaA"},
-                "drill" : {"mode" : "drill", "h" : 60, "w" : 145,  "color" : "orange", "duration" : 2, "health" : 1, "img" : "spaceShipShieldA"}
-            };
+            var modes = sideScrollLevel.PlayerModes;
             for (var key in modes[itemData.mode]) {
                 if (modes[itemData.mode].hasOwnProperty(key)) {
                     if (key === "mode") {
@@ -475,12 +477,10 @@ var sideScrollLevel = {
         this.source = typeof argData.source !== "undefined" ? argData.source : "player";
         this.x = typeof argData.x !== "undefined" ? argData.x : game.playerArray[0].w;
         this.y = typeof argData.y !== "undefined" ? argData.y : game.playerArray[0].y + game.playerArray[0].h/2;
-        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 10;       // TODO: add radius?
+        this.radius = typeof argData.radius !== "undefined" ? argData.radius : 10;
         this.color = typeof argData.color !== "undefined" ? argData.color : "white";
         this.detectRemoval = typeof argData.detectRemoval !== "undefined" ? argData.detectRemoval : function() {
-            if (this.x > canvas.width || this.x < this.radius) {
-                this.terminate = true;
-            }
+            if (this.x > canvas.width || this.x < this.radius) this.terminate = true;
         };
         this.render = typeof argData.render !== "undefined" ? argData.render : function (updateObject) {
             game.bufferCanvasCtx.fillStyle = updateObject.color;
@@ -493,7 +493,7 @@ var sideScrollLevel = {
     "Effect" : function(argData) {
         var self = this;
         this.init = sideScrollLevel.GameObjectInit(self, argData);
-        this.sx = typeof argData.sx !== "undefined" ? argData.sx: 0;    // TODO: do I even need to declare any of these defaults?
+        this.sx = typeof argData.sx !== "undefined" ? argData.sx: 0;
         this.sy = typeof argData.sy !== "undefined" ? argData.sy: 0;
         this.opacity = typeof argData.opacity !== "undefined" ? argData.opacity: 0;
         this.text = typeof argData.text !== "undefined" ? argData.text : "";
@@ -505,7 +505,7 @@ var sideScrollLevel = {
         this.text = typeof argData.text !== "undefined" ? argData.text : "";
     },
 
-    "Opponent" : function (argData) {   // TODO: add items to opponent directly
+    "Opponent" : function (argData) {
         var self = this;
         this.init = sideScrollLevel.GameObjectInit(self, argData);
         this.score = typeof argData.score !== 'undefined' ? argData.score : 0;
@@ -529,7 +529,6 @@ var sideScrollLevel = {
             game.opponentArray.splice(i,1);
         };
         this.explode = function () {
-            // Draw the explosion // TODO: create functions for explosions that pass in the object being blown up as a parameter.
             game.effectArray[game.effectArray.length] = new sideScrollLevel.Effect({"x" : self.x, "y" : self.y, "img" : "explosionSprite", "update" : function() {this.sx += 100; if (this.sx >= 600) {this.sx = 0; this.sy += 100;} if (this.sy > 600) {this.terminate = true;}}, "render" : function() {game.bufferCanvasCtx.drawImage(game['img'][this.img], this.sx, this.sy, 100, 100, this.x, this.y, 200, 200)}});
         };
     },
@@ -546,6 +545,11 @@ var sideScrollLevel = {
      *    Game Object Data
      *
      */
+    "PlayerModes" : {
+        "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "color" : "white", "health" : 1, "img" : "spaceShipA"},
+        "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 10, "health" : 2, "img" : "spaceShipMegaA"},
+        "drill" : {"mode" : "drill", "h" : 60, "w" : 145,  "color" : "orange", "duration" : 2, "health" : 1, "img" : "spaceShipShieldA"}
+    },
     "OpponentData" : {
         "Bill" : { "name" : "Bill", "score" : 100, "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
         "Sam" : { "name" : "Sam", "score" : 200, "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
@@ -562,7 +566,6 @@ var sideScrollLevel = {
         "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
     },
     "ItemData" : {
-        "normal" : {"mode" : "normal"},
         "mega" : {"title" : "Mega", "mode" : "mega", "img" : "orbmega", "color" : "green", "duration" : 20},
         "dualLaser" : {"title" : "Dual Laser", "weapon" : "dualLaser", "img" : "orblaser", "color" : "purple", "duration" : 2},
         "shockWave" : {"title" : "Shock Wave", "weapon" : "shockWave", "img" : "orbshock", "color" : "yellow", "duration" : 3},
@@ -578,21 +581,6 @@ var sideScrollLevel = {
         "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Coke", "velx" : 5, "vely" : 0, "update" : function () { if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;} this.x += this.velx;}, "radius" : 20, "color" : "red"})}},
         "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "LSD", "velx" : 10, "vely" : Math.round(Math.random()*2 - 1) * 10, "update" : function () {this.x += this.velx; this.y += this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height) this.vely = -this.vely;}, "color" : "purple"})}},
         "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "color" : "red"})}}
-    },
-    "DisplayData" : {
-        // TODO: make the topBar object work, "game" was undefined.
-   /*     "topBar" : {"level" : game.currentLevel, "score" : game.score, "time" : 30, "lives" : game.lives,
-            "update" : function() {},
-            "render" : function() {
-                game.bufferCanvasCtx.font = "20pt Arial";
-                game.bufferCanvasCtx.fillStyle = "white";
-                var ymargin = 30;
-                game.bufferCanvasCtx.fillText("Level: " + game.currentLevel, 20, ymargin);
-                game.bufferCanvasCtx.fillText("Score: " + game.score, 300, ymargin);
-                game.bufferCanvasCtx.fillText("Time: " + game.currentTime.substr(0,2), 500, ymargin);
-                game.bufferCanvasCtx.fillText("Lives: " + game.lives, 800, ymargin);
-            }
-        } */
     }
 }
 
