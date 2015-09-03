@@ -70,33 +70,70 @@ Game.prototype = {
                         ]
                     },
                     levelOne : {
-                        "type" : "sideScrollLevel", "background" : "theSea", "timer" : 10,
-                        "opponents": ["CrabCakes", "Sam"], "win" : "levelTwo"
+                        "type" : "sideScrollLevel", 
+                        "background" : "theSea", 
+                        "timer" : 10,
+                        "opponents": ["Bill", "Sam", "CrabCakes"], 
+                        "win" : "levelTwo"
                     },
                     levelTwo : {
-                        "type" : "sideScrollLevel", "background" : "planetview", "timer" : 15,
-                        "opponents": ["Sam", "Darren"], "win" : "levelThree"
+                        "type" : "sideScrollLevel", 
+                        "background" : "planetview", 
+                        "timer" : 15,
+                        "opponents": ["Bill", "Sam", "Luciano"], 
+                        "win" : "levelThree"
                     },
                     levelThree : {
-                        "type" : "sideScrollLevel", "background" : "seasky", "timer" : 20,
-                        "opponents": ["Luciano", "Homer"], "win" : "levelFour"
+                        "type" : "sideScrollLevel", 
+                        "background" : "seasky", 
+                        "timer" : 20,
+                        "opponents": ["Sam", "Luciano", "Darren"], 
+                        "win" : "levelFour"
                     },
                     levelFour : {
-                        "type" : "sideScrollLevel", "background" : "AGHeads", "timer" : 25,
-                        "opponents": ["Sam", "Darren"], "win" : "winScreen"
+                        "type" : "sideScrollLevel", 
+                        "background" : "AGHeads", 
+                        "timer" : 25,
+                        "opponents": ["Sam", "Darren"], 
+                        "win" : "winScreen"
+                    },
+                    levelFive : {
+                        "type" : "sideScrollLevel", 
+                        "background" : "planetview", 
+                        "timer" : 30,
+                        "opponents": ["Sam", "Darren"], 
+                        "win" : "levelThree"
+                    },
+                    levelSix : {
+                        "type" : "sideScrollLevel", 
+                        "background" : "seasky", 
+                        "timer" : 35,
+                        "opponents": ["Luciano", "Homer"], 
+                        "win" : "levelFour"
+                    },
+                    levelSeven : {
+                        "type" : "sideScrollLevel", 
+                        "background" : "AGHeads", 
+                        "timer" : 40,
+                        "opponents": ["Sam", "Darren"], 
+                        "win" : "winScreen"
                     },
                     winScreen : {
-                        "type" : "basicSplashScreen", "background" : "youWin",
+                        "type" : "basicSplashScreen", 
+                        "background" : "youWin",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                         "events" : [
-                            {"event" : "mousedown", "action" : function() {game.loadGameLoop("startScreen");}}
+                            {"event" : "mousedown", 
+                             "action" : function() {game.loadGameLoop("startScreen");}}
                         ]
                     },
                     loseScreen : {
-                        "type" : "basicSplashScreen", "background" : "youLose",
+                        "type" : "basicSplashScreen", 
+                        "background" : "youLose",
                         "flashText" : { x: 500, y: 600, content: "Click to start over", font: "20pt Arial", color: "white"},
                         "events" : [
-                            {"event" : "mousedown", "action" : function() {game.initialize();}}
+                            {"event" : "mousedown", 
+                            "action" : function() {game.initialize();}}
                         ]
                     }
                 }
@@ -246,13 +283,35 @@ var sideScrollLevel = {
         game.effectArray = [];
         game.displayArray = [];
         game.objectArrays = [
-            { "name" : "playerArray", "collidesWith" : "opponentArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { a.getHit(i); game.opponentArray.splice(j,1);}}},
-            { "name" : "playerProjectileArray", "collidesWith" : "opponentArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j); game.playerProjectileArray.splice(i,1);}}},
-            { "name" : "opponentProjectileArray", "collidesWith" : "playerArray", "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j);  game.opponentProjectileArray.splice(i,1);}}},
-            { "name" : "opponentArray"},
-            { "name" : "itemArray", "collidesWith" : "playerArray", "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { /*game.itemArray[i].action();*/ game.playerArray[0].loadItem(game.itemArray[i]); game.itemArray.splice(i,1);}}},
-            { "name" : "effectArray"},
-            { "name" : "displayArray"}
+            {   
+                "name" : "playerArray", 
+                "collidesWith" : "opponentArray", 
+                "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { a.getHit(i); game.opponentArray.splice(j,1);}}
+            },
+            { 
+                "name" : "playerProjectileArray", 
+                "collidesWith" : "opponentArray", 
+                "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j); game.playerProjectileArray.splice(i,1);}}
+            },
+            { 
+                "name" : "opponentProjectileArray", 
+                "collidesWith" : "playerArray", 
+                "action" : function (a, b, i, j) {if (a.x + a.radius > b.x && a.x < b.x + b.w && a.y + a.radius > b.y && a.y < b.y + b.h) {b.getHit(j);  game.opponentProjectileArray.splice(i,1);}}
+            },
+            { 
+                "name" : "opponentArray"
+            },
+            { 
+                "name" : "itemArray", 
+                "collidesWith" : "playerArray", 
+                "action" : function(a, b, i, j) {if (a.x + a.w > b.x && a.x < b.x + b.w && a.y + a.h > b.y && a.y < b.y + b.h) { /*game.itemArray[i].action();*/ game.playerArray[0].loadItem(game.itemArray[i]); game.itemArray.splice(i,1);}}
+            },
+            {
+                "name" : "effectArray"
+            },
+            {
+                "name" : "displayArray"
+            }
         ];
 
         // Create the player
@@ -277,12 +336,13 @@ var sideScrollLevel = {
             game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(sideScrollLevel['OpponentData'][spaceFishData[game.currentLevel]['opponents'][Math.floor(Math.random() * spaceFishData[game.currentLevel]['opponents'].length)]]);
         }, 1000);
     },
+
     "clearScreen" : function() {
         game.bufferCanvasCtx.fillStyle = "black";
         game.bufferCanvasCtx.fillRect(0, 0, game.bufferCanvasCtx.canvas.width, game.bufferCanvasCtx.canvas.height);
-
         game.bufferCanvasCtx.drawImage(game['img'][window.spaceFishData[game.currentLevel].background], game.backgroundShift, 0);
     },
+
     "update" : function() {
         // shift background
         game.backgroundShift -= .2;
@@ -323,6 +383,7 @@ var sideScrollLevel = {
             }
         }
     },
+
     "render" : function() {
         for (var k=0; k<=game.objectArrays.length-1; k++) {
             if (typeof game[game.objectArrays[k].name] !== "undefined") {
@@ -356,6 +417,7 @@ var sideScrollLevel = {
             game.bufferCanvasCtx.fillText(game.playerArray[0].mode.title, game.bufferCanvas.width/2 - 50, game.bufferCanvas.height - (15+modeHeight));
         }
     },
+
     "events" : [
         {"event" : "mousedown", "action" : function() {
             sideScrollLevel['WeaponData'][game.playerArray[0].weapon.name]["fire"]();
@@ -546,41 +608,291 @@ var sideScrollLevel = {
      *
      */
     "PlayerModes" : {
-        "normal" : {"mode" : "normal", "h" : 60, "w" : 120, "color" : "white", "health" : 1, "img" : "spaceShipA"},
-        "mega" : {"mode" : "mega", "h" : 80, "w" : 120,  "color" : "green", "duration" : 10, "health" : 2, "img" : "spaceShipMegaA"},
-        "drill" : {"mode" : "drill", "h" : 60, "w" : 145,  "color" : "orange", "duration" : 2, "health" : 1, "img" : "spaceShipShieldA"}
-    },
-    "OpponentData" : {
-        "Bill" : { "name" : "Bill", "score" : 100, "w" : 300, "h" : 150, "velx" : 15, "img" : "bigBloaterA", "item" : "mega", "update" : function() {this.x -= this.velx;}},
-        "Sam" : { "name" : "Sam", "score" : 200, "w" : 150, "h" : 75, "velx" : 20, "img" : "speedyBlueA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}},
-        "Luciano" : { "name" : "Luciano", "score" : 300, "w" : 200, "h" : 300, "velx" : 25, "img" : "sinusoidSwimmerA", "item" : "shockWave", "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}},
-        "Homer" : { "name" : "Homer", "score" : 400, "w" : 230, "h" : 115, "velx" : 35, "img" : "homingFishA", "item" : "homingMissile", "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}},
-        "Darren" : { "name" : "Darren", "score" : 500, "w" : 250, "h" : 250, "velx" : 15, "img" : "splitFishBigA", "item" : "dualLaser", "update" : function() {this.x -= this.velx;}, "getHit" : function(i) {
-            game.opponentArray[i].explode(); for (var k=-5; k<=5; k+=5) {
-            var dylanData = sideScrollLevel['OpponentData']['Dylan']; dylanData.x = game.opponentArray[i].x; dylanData.y = game.opponentArray[i].y; dylanData.vely = k;
-            game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(dylanData);
+        "normal" : {
+            "mode" : "normal", 
+            "h" : 60, 
+            "w" : 120, 
+            "color" : "white", 
+            "health" : 1, 
+            "img" : "spaceShipA"
+        },
+        "mega" : {
+            "mode" : "mega", 
+            "h" : 80, 
+            "w" : 120,  
+            "color" : "green", 
+            "duration" : 10, 
+            "health" : 2, 
+            "img" : "spaceShipMegaA"
+        },
+        "drill" : {
+            "mode" : "drill", 
+            "h" : 60, 
+            "w" : 145,  
+            "color" : "orange", 
+            "duration" : 2, 
+            "health" : 1, 
+            "img" : "spaceShipShieldA"
         }
-            game.opponentArray.splice(i,1);}},
-        "Dylan" : { "name" : "Dylan", "score" : 500, "w" : 125, "h" : 75, "velx" : 25, "img" : "splitFishSmallA", "item" : "bouncyBalls", "update" : function() {this.x -= this.velx; this.y -= this.vely;}},
-        "Frank" : { "name" : "Frank", "score" : 600,  "w" : 300, "h" : 150, "velx" : 15, "img" : "spitFireFishA", "item" : "drill", "update" : function() {this.x -= this.velx;  if (this.x >700 && this.x < 720) {game.opponentProjectileArray[game.opponentProjectileArray.length] = new sideScrollLevel.Blast({"name" : "Heroin", "source" : "opponent", "x" : this.x, "y" : this.y + this.h/2, "velx" : -20, "vely" : 0, "update" : function () {this.x += this.velx}, "radius" : 10, "color" : "orange"})}}},
-        "CrabCakes" : { "name" : "CrabCakes", "score" : 700, "w" : 200, "h" : 200, "velx" : 20, "vely" : 4, "img" : "crabCakesA", "item" : "hellFire", "update" : function() {this.x -= this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;}}
+    },
+
+    "OpponentData" : {
+        "Bill" : { 
+            "name" : "Bill", 
+            "score" : 100, 
+            "w" : 300, 
+            "h" : 150, 
+            "velx" : 15, 
+            "img" : "bigBloaterA", 
+            "item" : "mega", 
+            "update" : function() {this.x -= this.velx;}
+        },
+        "Sam" : { 
+            "name" : "Sam", 
+            "score" : 200, 
+            "w" : 150, 
+            "h" : 75, 
+            "velx" : 20, 
+            "img" : "speedyBlueA", 
+            "item" : "dualLaser", 
+            "update" : function() {this.x -= this.velx;}
+        },
+        "Luciano" : { 
+            "name" : "Luciano", 
+            "score" : 300, 
+            "w" : 200, 
+            "h" : 300, 
+            "velx" : 25, 
+            "img" : "sinusoidSwimmerA", 
+            "item" : "shockWave", 
+            "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}
+        },
+        "Homer" : { 
+            "name" : "Homer", 
+            "score" : 400, 
+            "w" : 230, 
+            "h" : 115, 
+            "velx" : 35, 
+            "img" : "homingFishA", 
+            "item" : "homingMissile", 
+            "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}
+        },
+        "Darren" : { 
+            "name" : "Darren", 
+            "score" : 500, 
+            "w" : 250, 
+            "h" : 250, 
+            "velx" : 15, 
+            "img" : "splitFishBigA", 
+            "item" : "dualLaser", 
+            "update" : function() {this.x -= this.velx;}, "getHit" : function(i) {
+                game.opponentArray[i].explode(); 
+                for (var k=-5; k<=5; k+=5) {
+                    var dylanData = sideScrollLevel['OpponentData']['Dylan']; 
+                    dylanData.x = game.opponentArray[i].x; dylanData.y = game.opponentArray[i].y; dylanData.vely = k;
+                    game.opponentArray[game.opponentArray.length] = new sideScrollLevel.Opponent(dylanData);
+                }
+                game.opponentArray.splice(i,1);
+            }
+        },
+        "Dylan" : { 
+            "name" : "Dylan", 
+            "score" : 500, 
+            "w" : 125, 
+            "h" : 75, 
+            "velx" : 25, 
+            "img" : "splitFishSmallA", 
+            "item" : "bouncyBalls", 
+            "update" : function() {this.x -= this.velx; this.y -= this.vely;}
+        },
+        "Frank" : { 
+            "name" : "Frank", 
+            "score" : 600,  
+            "w" : 300, 
+            "h" : 150, 
+            "velx" : 15, 
+            "img" : "spitFireFishA", 
+            "item" : "drill", 
+            "update" : function() {
+                this.x -= this.velx;  
+                if (this.x >700 && this.x < 720) {
+                    game.opponentProjectileArray[game.opponentProjectileArray.length] = new sideScrollLevel.Blast({
+                        "name" : "Heroin", 
+                        "source" : "opponent", 
+                        "x" : this.x, 
+                        "y" : this.y + this.h/2, 
+                        "velx" : -20, 
+                        "vely" : 0, 
+                        "update" : function () {this.x += this.velx}, 
+                        "radius" : 10, 
+                        "color" : "orange"
+                    }
+                )}
+            }
+        },
+        "CrabCakes" : { 
+            "name" : "CrabCakes", 
+            "score" : 700, 
+            "w" : 200, 
+            "h" : 200, 
+            "velx" : 20, 
+            "vely" : 4, 
+            "img" : "crabCakesA", 
+            "item" : "hellFire", 
+            "update" : function() {
+                this.x -= this.velx; 
+                if (this.x < 0) this.velx = -this.velx; 
+                if (this.x + this.w > canvas.width && this.velx < 0) this.velx = -this.velx; 
+                this.y -= this.vely; 
+                if (this.y < 0) this.vely = -this.vely; 
+                if (this.y + this.h > canvas.height && this.vely < 0) this.vely = -this.vely;
+            }
+        }
     },
     "ItemData" : {
-        "mega" : {"title" : "Mega", "mode" : "mega", "img" : "orbmega", "color" : "green", "duration" : 20},
-        "dualLaser" : {"title" : "Dual Laser", "weapon" : "dualLaser", "img" : "orblaser", "color" : "purple", "duration" : 2},
-        "shockWave" : {"title" : "Shock Wave", "weapon" : "shockWave", "img" : "orbshock", "color" : "yellow", "duration" : 3},
-        "homingMissile" : {"title" : "Homing Missile", "weapon" : "homingMissile", "img" : "orbhoming",  "color" : "red", "duration" : 4},
-        "bouncyBalls" : {"title" : "Bouncy Balls", "weapon" : "bouncyBalls", "img" : "orbbouncy",  "color" : "blue", "duration" : 5},
-        "drill" : {"title" : "Drill", "mode" : "drill", "img" : "orbdrill", "color" : "orange", "duration" : 6},
-        "hellFire" : {"title" : "Hell Fire", "weapon" : "hellFire", "img" : "orbhellfire", "color" : "black", "duration" : 7}
+        "mega" : {
+            "title" : "Mega", 
+            "mode" : "mega", 
+            "img" : "orbmega", 
+            "color" : "green", 
+            "duration" : 20
+        },
+        "dualLaser" : {
+            "title" : "Dual Laser", 
+            "weapon" : "dualLaser", 
+            "img" : "orblaser", 
+            "color" : "purple", 
+            "duration" : 2
+        },
+        "shockWave" : {
+            "title" : "Shock Wave", 
+            "weapon" : "shockWave", 
+            "img" : "orbshock", 
+            "color" : "yellow", 
+            "duration" : 3
+        },
+        "homingMissile" : {
+            "title" : "Homing Missile", 
+            "weapon" : "homingMissile", 
+            "img" : "orbhoming",  
+            "color" : "red", 
+            "duration" : 4
+        },
+        "bouncyBalls" : {
+            "title" : "Bouncy Balls", 
+            "weapon" : "bouncyBalls", 
+            "img" : "orbbouncy",  
+            "color" : "blue", 
+            "duration" : 5
+        },
+        "drill" : {
+            "title" : "Drill", 
+            "mode" : "drill", 
+            "img" : "orbdrill", 
+            "color" : "orange", 
+            "duration" : 6
+        },
+        "hellFire" : {
+            "title" : "Hell Fire", 
+            "weapon" : "hellFire", 
+            "img" : "orbhellfire", 
+            "color" : "black", 
+            "duration" : 7
+        }
     },
     "WeaponData" : {     // TODO: figure out whether to put this with itemData, not sure yet
-        "peaShooter" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Placebo", "velx" : 10, "vely" : 0, "color" : "white"})}},
-        "dualLaser" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)-15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"}); game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Speed", "y" : (game.playerArray[0].y + game.playerArray[0].h/2)+15, "velx" : 10, "vely" : 0, "radius" : 7, "color" : "red"});}},
-        "shockWave" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Molly", "velx" : 10, "vely" : 0, "update" : function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;}, "color" : "yellow"})}},
-        "homingMissile" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Coke", "velx" : 5, "vely" : 0, "update" : function () { if (game.opponentArray.length > 0) {this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;} this.x += this.velx;}, "radius" : 20, "color" : "red"})}},
-        "bouncyBalls" : {"fire" : function() { game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "LSD", "velx" : 10, "vely" : Math.round(Math.random()*2 - 1) * 10, "update" : function () {this.x += this.velx; this.y += this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height) this.vely = -this.vely;}, "color" : "purple"})}},
-        "hellFire" : {"fire" : function() {game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({"title" : "Party", "velx" : Math.round(Math.random()*20 - 10), "vely" : Math.round(Math.random()*20 - 10), "update" : function () {this.x += this.velx; if (this.x < 0) this.velx = -this.velx; if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; this.y -= this.vely; if (this.y < 0) this.vely = -this.vely; if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;}, "color" : "red"})}}
+        "peaShooter" : {
+            "fire" : function() {
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Placebo", 
+                    "velx" : 10, 
+                    "vely" : 0, 
+                    "color" : "white"
+                });
+            }
+        },
+        "dualLaser" : {
+            "fire" : function() {
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Speed", 
+                    "y" : (game.playerArray[0].y + game.playerArray[0].h/2)-15, 
+                    "velx" : 10, 
+                    "vely" : 0, 
+                    "radius" : 7, 
+                    "color" : "red"
+                }); 
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Speed", 
+                    "y" : (game.playerArray[0].y + game.playerArray[0].h/2)+15, 
+                    "velx" : 10, 
+                    "vely" : 0, 
+                    "radius" : 7, 
+                    "color" : "red"
+                });
+            }
+        },
+        "shockWave" : {
+            "fire" : function() {
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Molly", 
+                    "velx" : 10, 
+                    "vely" : 0, 
+                    "update" : function () {this.x += this.velx; var sin = Math.sin(this.x * 2.5) * 8; this.y += sin;}, 
+                    "color" : "yellow"
+                });
+            }
+        },
+        "homingMissile" : {
+            "fire" : function() {
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Coke", 
+                    "velx" : 5, 
+                    "vely" : 0, 
+                    "update" : function () { 
+                        if (game.opponentArray.length > 0) {
+                            this.y += (game.opponentArray[game.opponentArray.length-1].y - this.y) * .05;
+                        } 
+                        this.x += this.velx;
+                    }, 
+                    "radius" : 20, 
+                    "color" : "red"
+                });
+            }
+        },
+        "bouncyBalls" : {
+            "fire" : function() { 
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "LSD", 
+                    "velx" : 10, 
+                    "vely" : Math.round(Math.random()*2 - 1) * 10, 
+                    "update" : function () {
+                        this.x += this.velx; 
+                        this.y += this.vely; 
+                        if (this.y < 0) this.vely = -this.vely; 
+                        if (this.y + this.radius > canvas.height) this.vely = -this.vely;
+                    }, 
+                    "color" : "purple"
+                });
+            }
+        },
+        "hellFire" : {
+            "fire" : function() {
+                game.playerProjectileArray[game.playerProjectileArray.length] = new sideScrollLevel.Blast({
+                    "title" : "Party", 
+                    "velx" : Math.round(Math.random()*20 - 10), 
+                    "vely" : Math.round(Math.random()*20 - 10), 
+                    "update" : function () {
+                        this.x += this.velx; 
+                        if (this.x < 0) this.velx = -this.velx; 
+                        if (this.x + this.radius > canvas.width && this.velx > 0) this.velx = -this.velx; 
+                        this.y -= this.vely; 
+                        if (this.y < 0) this.vely = -this.vely; 
+                        if (this.y + this.radius > canvas.height && this.vely < 0) this.vely = -this.vely;
+                    }, 
+                    "color" : "red"
+                });
+            }
+        }
     }
 }
 
