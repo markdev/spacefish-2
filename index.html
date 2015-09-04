@@ -6,7 +6,6 @@
         #results li.fail { color: red; }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="myFunctions.js"></script>
 </head>
 <body>
 
@@ -15,7 +14,16 @@
 <ul id="results"></ul>
 
 <script>
-console.log("I live");
+
+function extend(destination, source) {
+    for (var k in source) {
+        if (source.hasOwnProperty(k)) {
+            destination[k] = source[k];
+        }
+    }
+    return destination;
+}
+
 window.requestAnimFrame = function(){
     return (
             window.requestAnimationFrame       ||
