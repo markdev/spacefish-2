@@ -5,8 +5,7 @@
         #results li.pass { color: green; }
         #results li.fail { color: red; }
     </style>
-  <!--  <script src="jquery-1.9.0.min.js"></script> -->
-    <script src="jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script src="myFunctions.js"></script>
 </head>
 <body>
@@ -47,7 +46,7 @@ var Game = function () {
     this.score = 0;
     this.lives = 3;
     this.img = {};
-    this.imgArray = ["AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA", "crabCakesB", "darkBack", "explosionSprite", "homingFishA", "homingFishB", "orbbouncy", "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock", "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip", "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield", "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA", "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB", "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs", "youLose", "youWin"];
+    this.imgArray = ["alienaudience", "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA", "crabCakesB", "darkBack", "explosionSprite", "homingFishA", "homingFishB", "orbbouncy", "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock", "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip", "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield", "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA", "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB", "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs", "youLose", "youWin"];
 };
 
 Game.prototype = {
@@ -64,58 +63,68 @@ Game.prototype = {
                 // <!-- Move this into a script later
                 window.spaceFishData = {
                     startScreen : {
-                        "type" : "startScreen", "background" : "startScreen", "flashText" : { x: 500, y: 600, content: "Click to continue", font: "20pt Arial", color: "white"},
+                        "type" : "startScreen", 
+                        "background" : "startScreen", 
+                        "flashText" : { 
+                            x: 500, 
+                            y: 600, 
+                            content: "Click to continue", 
+                            font: "20pt Arial", 
+                            color: "white"
+                        },
                         "events" : [
-                            {"event" : "mousedown", "action" : function() {game.loadGameLoop("levelOne");}}
+                            {
+                                "event" : "mousedown", 
+                                "action" : function() {game.loadGameLoop("levelOne");}
+                            }
                         ]
                     },
                     levelOne : {
                         "type" : "sideScrollLevel", 
                         "background" : "theSea", 
-                        "timer" : 10,
-                        "opponents": ["Bill", "Sam", "CrabCakes"], 
+                        //"timer" : 20,
+                        "timer" : 5,
+                        "opponents": ["Bill", "Sam"], 
                         "win" : "levelTwo"
                     },
                     levelTwo : {
                         "type" : "sideScrollLevel", 
-                        "background" : "planetview", 
-                        "timer" : 15,
+                        "background" : "seasky", 
+                        //"timer" : 25,
+                        "timer" : 5,
                         "opponents": ["Bill", "Sam", "Luciano"], 
                         "win" : "levelThree"
                     },
                     levelThree : {
                         "type" : "sideScrollLevel", 
-                        "background" : "seasky", 
-                        "timer" : 20,
+                        "background" : "planetview", 
+                        //"timer" : 30,
+                        "timer" : 5,
                         "opponents": ["Sam", "Luciano", "Darren"], 
                         "win" : "levelFour"
                     },
                     levelFour : {
                         "type" : "sideScrollLevel", 
-                        "background" : "AGHeads", 
-                        "timer" : 25,
-                        "opponents": ["Sam", "Darren"], 
-                        "win" : "winScreen"
+                        "background" : "trippyeyeballs", 
+                        //"timer" : 35,
+                        "timer" : 5,
+                        "opponents": ["Luciano", "Darren", "Homer"], 
+                        "win" : "levelFive"
                     },
                     levelFive : {
                         "type" : "sideScrollLevel", 
-                        "background" : "planetview", 
-                        "timer" : 30,
-                        "opponents": ["Sam", "Darren"], 
-                        "win" : "levelThree"
+                        "background" : "alienaudience", 
+                        //"timer" : 40,
+                        "timer" : 5,
+                        "opponents": ["Darren", "Homer", "Frank"], 
+                        "win" : "levelSix"
                     },
                     levelSix : {
                         "type" : "sideScrollLevel", 
-                        "background" : "seasky", 
-                        "timer" : 35,
-                        "opponents": ["Luciano", "Homer"], 
-                        "win" : "levelFour"
-                    },
-                    levelSeven : {
-                        "type" : "sideScrollLevel", 
                         "background" : "AGHeads", 
-                        "timer" : 40,
-                        "opponents": ["Sam", "Darren"], 
+                        //"timer" : 45,
+                        "timer" : 5,
+                        "opponents": ["Homer", "Frank", "Crabcakes"], 
                         "win" : "winScreen"
                     },
                     winScreen : {
