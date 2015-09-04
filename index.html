@@ -2,14 +2,15 @@
 <head>
     <style>
         canvas#canvas { background-color: #000; }
-        #results li.pass { color: green; }
-        #results li.fail { color: red; }
+        h1 {color: white;}
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
 <body>
 
-<canvas id="canvas" height="700" width="1200">Joo cannot see me!</canvas>
+<canvas id="canvas" height="700" width="1200">
+
+</canvas>
 
 <ul id="results"></ul>
 
@@ -38,6 +39,12 @@ window.requestAnimFrame = function(){
 var Game = function () {
     this.canvas = document.getElementById("canvas");
     this.ctx = canvas.getContext("2d");
+
+    // Loading screen
+    this.ctx.font = "20pt Arial";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText("Now loading images...just a few seconds...I do hope you enjoy my fish", 10, 30);
+
     this.bufferCanvas = document.createElement("canvas");
     this.bufferCanvasCtx = this.bufferCanvas.getContext("2d");
     this.bufferCanvasCtx.canvas.width = this.ctx.canvas.width;
