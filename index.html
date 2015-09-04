@@ -461,12 +461,26 @@ var sideScrollLevel = {
 
 
 
-    "GameObject" : { "terminate" : false, "name" : "", "x" : 0, "y" : 0, "velx" : 0, "vely" : 0, "w" : 30, "h" : 15,
-                     "update" : function () {this.x += this.velx; this.y += this.vely;},
-                     "detectRemoval" : function () {if (this.x < -(this.w) || this.x > canvas.width) {this.terminate = true;}},
-                     "render" : function (updateObject) {
-                         game.bufferCanvasCtx.drawImage(game['img'][updateObject.img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);}
-                    },
+    "GameObject" : { 
+        "terminate" : false, 
+        "name" : "", 
+        "x" : 0, 
+        "y" : 0, 
+        "velx" : 0, 
+        "vely" : 0, 
+        "w" : 30, 
+        "h" : 15,
+        "update" : function () {this.x += this.velx; this.y += this.vely;},
+        "detectRemoval" : function () {if (this.x < -(this.w) || this.x > canvas.width) {this.terminate = true;}},
+        "render" : function (updateObject) {
+            img = updateObject.img;
+            // toggles the opponent image
+            if (updateObject.hasOwnProperty('imgb')) {
+                img = (Number(String(Date.now()).charAt(10)) > 5)? updateObject.img : updateObject.imgb;
+            }
+            game.bufferCanvasCtx.drawImage(game['img'][img], updateObject.x, updateObject.y, updateObject.w, updateObject.h);
+        }
+    },
 
     "GameObjectInit" : function (self, argData) {
         for (var key in sideScrollLevel.GameObject) {if (!self.hasOwnProperty(key)) self[key] = sideScrollLevel.GameObject[key];}
@@ -669,6 +683,7 @@ var sideScrollLevel = {
             "h" : 150, 
             "velx" : 15, 
             "img" : "bigBloaterA", 
+            "imgb" : "bigBloaterB", 
             "item" : "mega", 
             "update" : function() {this.x -= this.velx;}
         },
@@ -679,6 +694,7 @@ var sideScrollLevel = {
             "h" : 75, 
             "velx" : 20, 
             "img" : "speedyBlueA", 
+            "imgb" : "speedyBlueB", 
             "item" : "dualLaser", 
             "update" : function() {this.x -= this.velx;}
         },
@@ -689,6 +705,7 @@ var sideScrollLevel = {
             "h" : 300, 
             "velx" : 25, 
             "img" : "sinusoidSwimmerA", 
+            "imgb" : "sinusoidSwimmerB", 
             "item" : "shockWave", 
             "update" : function() {this.x -= this.velx; var sin = Math.sin(this.x * 2.5) * 80; this.y += sin;}
         },
@@ -699,6 +716,7 @@ var sideScrollLevel = {
             "h" : 115, 
             "velx" : 35, 
             "img" : "homingFishA", 
+            "imgb" : "homingFishB", 
             "item" : "homingMissile", 
             "update" : function() {this.x -= this.velx; this.y += ((this.y + this.h/2) > game.playerArray[0].y)? -10 : 10;}
         },
@@ -709,6 +727,7 @@ var sideScrollLevel = {
             "h" : 250, 
             "velx" : 15, 
             "img" : "splitFishBigA", 
+            "imgb" : "splitFishBigB", 
             "item" : "dualLaser", 
             "update" : function() {this.x -= this.velx;}, "getHit" : function(i) {
                 game.opponentArray[i].explode(); 
@@ -727,6 +746,7 @@ var sideScrollLevel = {
             "h" : 75, 
             "velx" : 25, 
             "img" : "splitFishSmallA", 
+            "imgb" : "splitFishSmallB", 
             "item" : "bouncyBalls", 
             "update" : function() {this.x -= this.velx; this.y -= this.vely;}
         },
@@ -737,6 +757,7 @@ var sideScrollLevel = {
             "h" : 150, 
             "velx" : 15, 
             "img" : "spitFireFishA", 
+            "imgb" : "spitFireFishB", 
             "item" : "drill", 
             "update" : function() {
                 this.x -= this.velx;  
@@ -763,6 +784,7 @@ var sideScrollLevel = {
             "velx" : 20, 
             "vely" : 4, 
             "img" : "crabCakesA", 
+            "imgb" : "crabCakesB", 
             "item" : "hellFire", 
             "update" : function() {
                 this.x -= this.velx; 
