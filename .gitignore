@@ -1,2 +1,5 @@
 .idea/
 *.swp
+images/startScreen.psd
+.DS_Store
+images/.DS_Store
