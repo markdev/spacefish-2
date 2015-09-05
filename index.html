@@ -62,7 +62,7 @@ var Game = function () {
     this.score = 0;
     this.lives = 3;
     this.img = {};
-    this.imgArray = ["alienaudience", "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "crabCakesA", "crabCakesB", "darkBack", "explosionSprite", "homingFishA", "homingFishB", "orbbouncy", "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock", "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip", "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield", "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA", "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB", "splitFishSmallA", "splitFishSmallB", "startScreen", "theSea", "trippyeyeballs", "youLose", "youWin"];
+    this.imgArray = ["alienaudience", "AGHeads", "bigBloater", "bigBloaterA", "bigBloaterB", "blackhole", "crabCakesA", "crabCakesB", "darkBack", "explosionSprite", "homingFishA", "homingFishB", "orbbouncy", "orbdrill", "orbhellfire", "orbhoming", "orblaser", "orbmega", "orbshock", "planets", "planetview", "seasky", "sinusoidSwimmerA", "sinusoidSwimmerB", "spaceShip", "spaceShipA", "spaceShipB", "spaceShipMegaA", "spaceShipMegaB", "spaceShipShield", "spaceShipShieldA", "spaceShipShieldB", "speedyBlueA", "speedyBlueB", "spitFireBulletA", "spitFireBulletB", "spitFireFishA", "spitFireFishB", "splitFishBigA", "splitFishBigB", "splitFishSmallA", "splitFishSmallB", "startScreenWInstructions", "theSea", "trippyeyeballs", "youLose", "youWin"];
 };
 
 Game.prototype = {
@@ -80,10 +80,10 @@ Game.prototype = {
                 window.spaceFishData = {
                     startScreen : {
                         "type" : "startScreen", 
-                        "background" : "startScreen", 
+                        "background" : "startScreenWInstructions", 
                         "flashText" : { 
                             x: 500, 
-                            y: 600, 
+                            y: 625, 
                             content: "Click to continue", 
                             font: "20pt Arial", 
                             color: "white"
@@ -91,56 +91,64 @@ Game.prototype = {
                         "events" : [
                             {
                                 "event" : "mousedown", 
-                                "action" : function() {game.loadGameLoop("levelOne");}
+                                "action" : function() {game.loadGameLoop("One");}
                             }
                         ]
                     },
-                    levelOne : {
-                        "type" : "sideScrollLevel", 
-                        "background" : "theSea", 
-                        //"timer" : 20,
-                        "timer" : 5,
-                        "opponents": ["Bill", "Sam"], 
-                        "win" : "levelTwo"
-                    },
-                    levelTwo : {
+                    One : {
                         "type" : "sideScrollLevel", 
                         "background" : "seasky", 
-                        //"timer" : 25,
-                        "timer" : 5,
-                        "opponents": ["Bill", "Sam", "Luciano"], 
-                        "win" : "levelThree"
+                        "timer" : 20,
+                        //"timer" : 5,
+                        "opponents": ["Bill", "Sam"], 
+                        "win" : "Two"
                     },
-                    levelThree : {
+                    Two : {
                         "type" : "sideScrollLevel", 
                         "background" : "planetview", 
-                        //"timer" : 30,
-                        "timer" : 5,
-                        "opponents": ["Sam", "Luciano", "Darren"], 
-                        "win" : "levelFour"
+                        "timer" : 25,
+                        //"timer" : 5,
+                        "opponents": ["Bill", "Sam", "Luciano"], 
+                        "win" : "Three"
                     },
-                    levelFour : {
+                    Three : {
                         "type" : "sideScrollLevel", 
-                        "background" : "trippyeyeballs", 
-                        //"timer" : 35,
-                        "timer" : 5,
-                        "opponents": ["Luciano", "Darren", "Homer"], 
-                        "win" : "levelFive"
+                        "background" : "planets", 
+                        "timer" : 30,
+                        //"timer" : 5,
+                        "opponents": ["Sam", "Luciano", "Darren"], 
+                        "win" : "Four"
                     },
-                    levelFive : {
+                    Four : {
+                        "type" : "sideScrollLevel", 
+                        "background" : "blackhole", 
+                        "timer" : 35,
+                        //"timer" : 5,
+                        "opponents": ["Darren", "Homer"], 
+                        "win" : "Five"
+                    },
+                    Five : {
                         "type" : "sideScrollLevel", 
                         "background" : "alienaudience", 
-                        //"timer" : 40,
-                        "timer" : 5,
-                        "opponents": ["Darren", "Homer", "Frank"], 
-                        "win" : "levelSix"
+                        "timer" : 40,
+                        //"timer" : 1,
+                        "opponents": ["Homer", "Frank"], 
+                        "win" : "Six"
                     },
-                    levelSix : {
+                    Six : {
+                        "type" : "sideScrollLevel", 
+                        "background" : "trippyeyeballs", 
+                        "timer" : 45,
+                        //"timer" : 1,
+                        "opponents": ["Frank", "Crabcakes"], 
+                        "win" : "Seven"
+                    },
+                    Seven : {
                         "type" : "sideScrollLevel", 
                         "background" : "AGHeads", 
-                        //"timer" : 45,
-                        "timer" : 5,
-                        "opponents": ["Homer", "Frank", "Crabcakes"], 
+                        "timer" : 50,
+                        //"timer" : 1,
+                        "opponents": ["Sam", "Luciano", "Darren", "Homer", "Frank", "Crabcakes"], 
                         "win" : "winScreen"
                     },
                     winScreen : {
@@ -378,7 +386,7 @@ var sideScrollLevel = {
             var zero = "0";
             game.currentTime = zero.concat(game.currentTime);
         }
-        if (Number(game.currentTime) < 0) game.loadGameLoop(window.spaceFishData[game.currentLevel].win);
+        if (isNaN(Number(game.currentTime))) game.loadGameLoop(window.spaceFishData[game.currentLevel].win);
 
         // update object arrays
         for (var k=0; k<=game.objectArrays.length-1; k++) {
@@ -494,6 +502,7 @@ var sideScrollLevel = {
         this.name = "player";
         this.health = 1;
         this.img = "spaceShipA";
+        this.imgb = "spaceShipB";
         this.weapon = {"name" : "peaShooter", "color" : "white", "title" : "Pea Shooter", "startTime" : 0, "endTime" : 0, "currentTime" : 0 };
         this.mode = {"name" : "normal", "color" : "white", "title" : "Normal", "startTime" : 0, "endTime" : 0, "currentTime" : 0 };
         this.update = function () {
@@ -653,7 +662,8 @@ var sideScrollLevel = {
             "w" : 120, 
             "color" : "white", 
             "health" : 1, 
-            "img" : "spaceShipA"
+            "img" : "spaceShipA",
+            "imgb" : "spaceShipB"
         },
         "mega" : {
             "mode" : "mega", 
@@ -662,7 +672,8 @@ var sideScrollLevel = {
             "color" : "green", 
             "duration" : 10, 
             "health" : 2, 
-            "img" : "spaceShipMegaA"
+            "img" : "spaceShipMegaA",
+            "imgb" : "spaceShipMegaB"
         },
         "drill" : {
             "mode" : "drill", 
@@ -671,7 +682,8 @@ var sideScrollLevel = {
             "color" : "orange", 
             "duration" : 2, 
             "health" : 1, 
-            "img" : "spaceShipShieldA"
+            "img" : "spaceShipShieldA",
+            "imgb" : "spaceShipShieldB"
         }
     },
 
