@@ -954,7 +954,9 @@ var sideScrollLevel = {
         }
     }
 }
-
+    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        alert("Sorry, this game is not optimized for mobile devices");
+    }
     var game = new Game();
     game.loadImage();
 </script>
